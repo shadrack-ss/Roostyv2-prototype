@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="robots" content="noindex, nofollow" />
         {/*
@@ -30,7 +30,13 @@ export default function RootLayout({
           href="roosty-hero-bg"
           precedence="theme"
         >{`.site-blocks-cover{background-color:#2c4a57;}`}</style>
-        <link rel="preload" as="image" href="/roosty-photos/hero/property-overview.jpg" />
+        {/*
+          The homepage hero's first slide. The other pages' heroes are still
+          plain .site-blocks-cover boxes using the theme photo, so they keep
+          the dark background above; this just gets the first homepage photo
+          painting as early as possible.
+        */}
+        <link rel="preload" as="image" href="/roosty-photos/real/exterior-01.jpg" />
         {/* eslint-disable @next/next/no-css-tags -- vendored theme stylesheets, loaded in original template order */}
         <link
           rel="stylesheet"
@@ -107,11 +113,15 @@ export default function RootLayout({
               .top-bar-wa { display:inline-flex; align-items:center; gap:8px; background:#2aa845; color:#ffffff; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.04em; padding:9px 22px; border-radius:4px; }
               .top-bar-wa:hover { background:#238a3a; color:#ffffff; }
 
-              /* Navbar: transparent over the hero, absolute so it scrolls away (not sticky) */
-              .site-navbar-wrap { position:absolute !important; top:40px; left:0; width:100%; z-index:40; background:transparent !important; padding:16px 0 !important; margin-bottom:0 !important; box-shadow:none !important; }
-              /* Belt-and-braces: the bg-white/bg-light classes are gone from
-                 the markup, but the theme's own stylesheet also paints these
-                 elements, so keep them explicitly transparent. */
+              /* Navbar: transparent so the hero photo runs right up behind
+                 it, absolute so it scrolls away (not sticky). Because there
+                 is no solid band, every link/logo colour below is white with
+                 a gold hover, reading directly against the photo.
+
+                 Belt-and-braces: the bg-white/bg-light utility classes are
+                 gone from the markup, but the theme's own stylesheet also
+                 paints these elements, so keep them explicitly transparent. */
+              .site-navbar-wrap { position:absolute !important; top:40px; left:0; width:100%; z-index:40; background:transparent !important; padding:6px 0 !important; margin-bottom:0 !important; box-shadow:none !important; }
               .site-navbar-wrap .site-navbar { background-color:transparent; }
 
               /* Center the nav in the full width: logo floats left, nav centered. */
@@ -122,11 +132,34 @@ export default function RootLayout({
                 .navbar-flex .site-logo { position:static; transform:none; }
                 .navbar-flex .site-navigation { text-align:right; }
               }
-              .site-navbar-wrap .site-navbar .site-logo a { color:#ffffff; }
-              .site-navbar-wrap .site-menu-toggle span { color:#c99e54; }
-              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a { color:#ffffff; font-weight:600; }
+              /* text-shadow so the white links stay legible over whichever
+                 hero photo happens to be behind them (some slides are bright). */
+              .site-navbar-wrap .site-navbar .site-logo a { color:#ffffff; text-shadow:0 1px 6px rgba(0,0,0,.45); }
+              .site-navbar-wrap .site-menu-toggle span { color:#ffffff; text-shadow:0 1px 6px rgba(0,0,0,.45); }
+              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a { color:#ffffff; font-weight:600; text-shadow:0 1px 6px rgba(0,0,0,.45); }
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a:hover { color:#c99e54; }
+              /* Active item stays white like the rest of the menu and is
+                 marked with a gold/brown rule underneath instead of a colour
+                 change. Drawn as a ::after bar rather than text-decoration so
+                 it sits a few px clear of the text and spans only the label,
+                 not the link's 10px horizontal padding. */
+              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a { position:relative; }
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.active > a { color:#ffffff !important; }
+              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.active > a::after {
+                content:'';
+                position:absolute;
+                left:10px;
+                right:10px;
+                bottom:4px;
+                height:2px;
+                background:#c99e54;
+                border-radius:2px;
+              }
+              /* "Rooms" is a .has-children item: the theme gives it an extra
+                 20px of right padding to hold the dropdown chevron (drawn as
+                 ::before, so no clash with the bar above). Pull the bar in so
+                 it underlines the word only, not the chevron. */
+              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.has-children.active > a::after { right:30px; }
 
               .book-now-btn a { display:inline-block; background:#c99e54; color:#13482c; font-weight:600; padding:8px 22px; border-radius:30px; text-transform:uppercase; letter-spacing:.05em; font-size:12px; white-space:nowrap; transition:all .3s ease; }
               .book-now-btn a:hover { background:#ffffff; color:#13482c; }
@@ -166,12 +199,46 @@ export default function RootLayout({
               /* Nudge the contact info right only on wide screens where there's room. */
               @media (min-width: 1200px) { .top-bar-info { margin-left:90px; } }
               /* On tablet/mobile the desktop nav collapses to a hamburger, so hide
-                 the top contact bar and drop the (transparent) navbar to the very
-                 top — the fixed 44px offset only makes sense under the one-line
-                 top bar shown on large screens. */
+                 the top contact bar and drop the navbar to the very top — the
+                 fixed 44px offset only makes sense under the one-line top bar
+                 shown on large screens.
+
+                 The navbar also goes SOLID here, unlike desktop. #faf8ef is the
+                 other Roosty's build's "paper" white — a warm off-white rather
+                 than pure #fff. Transparent-over-photo works on a wide screen
+                 where the logo and links sit over a calm part of the image, but
+                 on a phone they land right on the busiest part of the hero and
+                 become hard to read, so the band is opaque here and every
+                 colour flips to brand green with the text-shadows dropped. */
               @media (max-width: 991.98px) {
                 .top-bar { display:none; }
-                .site-navbar-wrap { top:0 !important; padding:12px 0 !important; }
+                .site-navbar-wrap {
+                  top:0 !important;
+                  padding:10px 0 !important;
+                  background:rgba(250,248,239,.95) !important;
+                  -webkit-backdrop-filter:blur(8px);
+                  backdrop-filter:blur(8px);
+                  border-bottom:1px solid #dcece0;
+                  box-shadow:0 1px 3px rgba(0,0,0,.04) !important;
+                }
+                .site-navbar-wrap .site-navbar { background-color:transparent; }
+                .site-navbar-wrap .site-navbar .site-logo a,
+                .site-navbar-wrap .site-menu-toggle span,
+                .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a {
+                  color:#13482c;
+                  text-shadow:none;
+                }
+                /* The logo image and the wordmark next to it are the two
+                   things setting this band's height, so both shrink here.
+                   !important on the image because its height is an inline
+                   style attribute, which a plain rule cannot outrank. The
+                   hamburger's own py-3 padding also has to come off, or it
+                   props the row open regardless of the two above. */
+                .site-logo-img { height:38px !important; margin-right:10px !important; }
+                .site-navbar-wrap .site-navbar .site-logo a { font-size:22px; }
+                .site-navbar-wrap .site-navigation .site-menu-toggle { padding-top:0 !important; padding-bottom:0 !important; }
+                .site-navbar-wrap .site-navigation > .d-inline-block { padding-top:0 !important; padding-bottom:0 !important; }
+                .site-navbar-wrap .site-navbar .py-1 { padding-top:0 !important; padding-bottom:0 !important; }
               }
         `}</style>
       </head>
@@ -232,16 +299,19 @@ export default function RootLayout({
                         href="/"
                         style={{ display: "inline-flex", alignItems: "center" }}
                       >
+                        {/* The tallest thing in the navbar, so this height is
+                            effectively what sets the white band's height. */}
                         <img
                           src="/roosty-photos/web-logo-main.jpg.png"
                           alt="Roosty's Homes logo"
+                          className="site-logo-img"
                           style={{
-                            height: "56px",
+                            height: "44px",
                             width: "auto",
                             marginRight: "12px",
                           }}
                         />
-                        <span>Roosty&apos;s Homes</span>
+                        <span style={{ fontWeight: 700 }}>Roosty&apos;s Homes</span>
                       </Link>
                     </h2>
                     <nav className="site-navigation" role="navigation">

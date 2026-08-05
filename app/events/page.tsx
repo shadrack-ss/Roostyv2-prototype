@@ -6,10 +6,31 @@ export default function Events() {
   return (
     <>
       <div
-        className="site-blocks-cover overlay"
+        className="site-blocks-cover overlay page-hero"
         style={{ backgroundImage: 'url(/theme/images/hero_1.jpg)' }}
         data-stellar-background-ratio="0.5"
       >
+        {/* Same Ken Burns treatment as the homepage slider hero — see about/page.tsx for the full explanation. */}
+        <style href="page-hero-kenburns" precedence="theme">{`
+          .page-hero { position:relative; overflow:hidden; }
+          .page-hero.site-blocks-cover.overlay::before { z-index:1; }
+          .page-hero::after {
+            content:"";
+            position:absolute;
+            top:0; right:0; bottom:0; left:0;
+            z-index:0;
+            background-image:inherit;
+            background-size:cover;
+            background-position:center center;
+            background-repeat:no-repeat;
+            animation: heroKenBurnsOnce 18s linear both;
+          }
+          .page-hero > .container { position:relative; z-index:2; }
+          @keyframes heroKenBurnsOnce { from { transform:scale(1); } to { transform:scale(1.16); } }
+          @media (prefers-reduced-motion: reduce) {
+            .page-hero::after { animation:none; }
+          }
+        `}</style>
         <div className="container">
           <div className="row align-items-center justify-content-center">
             <div className="col-md-7 text-center" data-aos="fade">

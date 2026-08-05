@@ -104,11 +104,62 @@ export default function Home() {
       <style>{`
         .home-slider.owl-carousel:not(.owl-loaded) { display: block; }
         .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover ~ .site-blocks-cover { display: none; }
+
+        /*
+          Slow "Ken Burns" zoom on each slide as it becomes active.
+
+          The photo is scaled on a ::after layer rather than on the slide
+          itself, so only the image moves and the heading stays perfectly
+          still and sharp. background-image:inherit picks up whichever photo
+          that slide set inline, so there is no second copy to maintain (and
+          it is the same URL, so no extra download).
+
+          Layering is set explicitly because none of these create a stacking
+          context on their own: ::after (photo) sits at 0, the theme's
+          existing ::before dark tint at 1, and the caption at 2.
+          overflow:hidden keeps the scaled photo from spilling out of the
+          slide and re-introducing horizontal scroll.
+        */
+        .home-slider .site-blocks-cover { position: relative; overflow: hidden; }
+        .home-slider .site-blocks-cover::after {
+          content: "";
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+          z-index: 0;
+          background-image: inherit;
+          background-size: cover;
+          background-position: center center;
+          background-repeat: no-repeat;
+          transform: scale(1);
+          will-change: transform;
+        }
+        .home-slider .site-blocks-cover.overlay::before { z-index: 1; }
+        .home-slider .site-blocks-cover > .container { position: relative; z-index: 2; }
+
+        /* Owl marks the visible slide .active, so the animation restarts on
+           every change. The :not(.owl-loaded) rule covers the very first
+           slide, which is painted before Owl has wrapped it in an .owl-item. */
+        .home-slider .owl-item.active .site-blocks-cover::after,
+        .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover:first-child::after {
+          animation: heroKenBurns 6s ease-out both;
+        }
+
+        @keyframes heroKenBurns {
+          from { transform: scale(1); }
+          to   { transform: scale(1.12); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .home-slider .owl-item.active .site-blocks-cover::after,
+          .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover:first-child::after {
+            animation: none;
+          }
+        }
       `}</style>
       <OwlCarousel className="slide-one-item home-slider owl-carousel" options={HERO_OPTIONS}>
         <div
           className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/theme/images/hero_1.jpg)' }}
+          style={{ backgroundImage: 'url(/roosty-photos/hero/property-overview.jpg)' }}
           data-stellar-background-ratio="0.5"
         >
           <div className="container">
@@ -123,7 +174,7 @@ export default function Home() {
 
         <div
           className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/theme/images/hero_2.jpg)' }}
+          style={{ backgroundImage: 'url(/roosty-photos/hero/restaurant-interior.jpg)' }}
           data-stellar-background-ratio="0.5"
         >
           <div className="container">
@@ -138,7 +189,7 @@ export default function Home() {
 
         <div
           className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/theme/images/hero_3.jpg)' }}
+          style={{ backgroundImage: 'url(/roosty-photos/hero/cottages.jpg)' }}
           data-stellar-background-ratio="0.5"
         >
           <div className="container">

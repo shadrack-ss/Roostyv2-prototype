@@ -30,7 +30,7 @@ export default function RootLayout({
           href="roosty-hero-bg"
           precedence="theme"
         >{`.site-blocks-cover{background-color:#2c4a57;}`}</style>
-        <link rel="preload" as="image" href="/theme/images/hero_1.jpg" />
+        <link rel="preload" as="image" href="/roosty-photos/hero/property-overview.jpg" />
         {/* eslint-disable @next/next/no-css-tags -- vendored theme stylesheets, loaded in original template order */}
         <link
           rel="stylesheet"

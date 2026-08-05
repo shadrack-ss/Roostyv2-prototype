@@ -1,46 +1,47 @@
 import Link from 'next/link';
-import { Raleway } from 'next/font/google';
+import { Raleway, Lora, Jost } from 'next/font/google';
 import OwlCarousel from './owl-carousel';
+import HeroSlideshow from './hero-slideshow';
 
 // Montana's own font (trying it out on the two Montana-derived sections
 // below, in place of the rest of the site's Playfair Display/Work Sans, to
 // see how it looks before committing).
-const raleway = Raleway({
+// Hero headline only. Lora is a warm, moderate-contrast serif -- unlike a
+// Didone (Playfair, Bodoni) its thin strokes never get truly hairline, which
+// is what keeps it solid over the hero photography. Italic is included for
+// the ampersand.
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-lora',
+  display: 'swap',
+});
+
+// Hero feature row only. Jost is a geometric sans with generously open,
+// even-width capitals -- which is what tracked-out all-caps needs. Raleway's
+// caps are comparatively narrow and slightly irregular in width, so at this
+// size and letter-spacing they looked unevenly gapped.
+const jost = Jost({
   subsets: ['latin'],
   weight: ['400', '500'],
+  variable: '--font-jost',
+  display: 'swap',
+});
+
+const raleway = Raleway({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
   variable: '--font-raleway',
   display: 'swap',
 });
 
-// Owl Carousel configs, copied verbatim from the theme's main.js so the
-// carousels behave identically to the original template.
-const HERO_OPTIONS = {
-  center: false,
-  items: 1,
-  loop: true,
-  stagePadding: 0,
-  margin: 0,
-  autoplay: true,
-  pauseOnHover: false,
-  // Only the outgoing slide is animated, deliberately. Owl stacks the
-  // outgoing slide above the incoming one (.owl-animated-out is z-index 1,
-  // .owl-animated-in is z-index 0), so fading just the top one out over a
-  // fully opaque slide underneath is already a true crossfade. Adding
-  // animateIn:'fadeIn' as well meant the incoming slide was fading up from
-  // transparent *underneath* the one fading out, so for the middle of every
-  // transition neither slide was opaque and the page background showed
-  // through as a dip -- which is what made the swap so noticeable.
-  animateOut: 'fadeOut',
-  // Owl's animate plugin writes smartSpeed onto the fade's
-  // animation-duration, so this is what controls how long the crossfade
-  // between two slides takes (its default, 250ms, reads as an abrupt cut).
-  smartSpeed: 1400,
-  // Time a slide is held before the next crossfade begins. Longer than the
-  // theme's 5s default so the hero feels unhurried rather than restless.
-  autoplayTimeout: 7000,
-  nav: true,
-  navText: ['<span class="icon-arrow_back">', '<span class="icon-arrow_forward">'],
-};
+
+// NOTE: the hero used to be a jQuery Owl Carousel driven by a HERO_OPTIONS
+// config here. It has been replaced wholesale by the other build's hero
+// (see <HeroSlideshow /> + .rh-hero below), which is pure CSS and needs no
+// Owl config — so that constant is gone. Owl still drives the Latest Updates
+// and testimonials carousels further down, hence the import above stays.
 
 const TESTIMONIALS_OPTIONS = {
   center: false,
@@ -77,7 +78,7 @@ const EVENTS_OPTIONS = {
 
 export default function Home() {
   return (
-    <div className={`raleway-page ${raleway.variable}`}>
+    <div className={`raleway-page ${raleway.variable} ${lora.variable} ${jost.variable}`}>
       {/*
         Trying Raleway (Montana's own font) across the whole homepage, not
         just the two Montana-derived sections, to see how it looks against
@@ -107,139 +108,206 @@ export default function Home() {
            don't need to be listed here. */
       `}</style>
       {/*
-        owl-carousel's own CSS sets display:none on .owl-carousel until its JS
-        adds the .owl-loaded class, so this hero collapses to zero height and
-        the section below jumps up until the carousel initializes — unlike the
-        other pages' hero, which is a plain .site-blocks-cover with no such
-        gate. This shows the first slide (at its normal full size) immediately
-        and hides the other two until owl-carousel takes over, so there's no
-        gap for it to fill in later.
+        HERO — ported wholesale from the other Roosty's Homes build. That
+        design is Tailwind-based and this project is not, so every utility
+        class has been rewritten as plain CSS below; the structure, colours,
+        type scale, spacing and animation are otherwise identical.
+
+        What was here before: a jQuery Owl Carousel of three
+        .site-blocks-cover slides, each with its own heading/caption/CTAs and
+        a CSS Ken Burns zoom. All of it is gone -- replaced by
+        <HeroSlideshow />, a dependency-free CSS crossfade. The site's own
+        top contact bar and navbar (in app/layout.tsx) are untouched and
+        still float over this section, exactly as before.
+
+        Palette is the other build's theme tokens, inlined since there is no
+        Tailwind @theme here: forest-950 #0a2216, forest-900 #0d2b1c,
+        forest-50 #f0f7f1, yellow-300 #f3e3a0, yellow-200 #f7ecbc.
       */}
-      <style>{`
-        .home-slider.owl-carousel:not(.owl-loaded) { display: block; }
-        .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover ~ .site-blocks-cover { display: none; }
-
+      <style href="rh-hero" precedence="theme">{`
         /*
-          Slow "Ken Burns" zoom on each slide as it becomes active.
+          section: relative flex items-end overflow-hidden.
 
-          The photo is scaled on a ::after layer rather than on the slide
-          itself, so only the image moves and the heading stays perfectly
-          still and sharp. background-image:inherit picks up whichever photo
-          that slide set inline, so there is no second copy to maintain (and
-          it is the same URL, so no extra download).
-
-          Layering is set explicitly because none of these create a stacking
-          context on their own: ::after (photo) sits at 0, the theme's
-          existing ::before dark tint at 1, and the caption at 2.
-          overflow:hidden keeps the scaled photo from spilling out of the
-          slide and re-introducing horizontal scroll.
+          The other build uses min-h-[88vh]; here it is a full 100vh so the
+          hero fills the desktop viewport exactly. The top contact bar and
+          navbar are position:absolute (see app/layout.tsx), so they take up
+          no flow height and simply overlay this section's first ~128px --
+          which means 100vh really is the whole first screen, with nothing
+          below the fold. Hero content is bottom-aligned, so it never
+          collides with those bars.
         */
-        .home-slider .site-blocks-cover { position: relative; overflow: hidden; }
-        .home-slider .site-blocks-cover::after {
-          content: "";
+        .rh-hero {
+          position: relative;
+          display: flex;
+          align-items: flex-end;
+          min-height: 100vh;
+          overflow: hidden;
+        }
+        /*
+          Two stacked layers, both on this one element:
+
+          1. A flat brand-green wash across the whole photo (the
+             background-color). This is the "light overlay" -- it evens out
+             the slides, which range from a bright white living room to a
+             dark exterior, so the white type has a consistent surface
+             underneath whichever one is showing.
+          2. The gradient on top of it, deepening toward the bottom where the
+             headline, feature row and buttons actually sit.
+
+          NOTE: no backticks anywhere in this block. All of this CSS lives
+          inside a JS template literal, so a stray backtick terminates the
+          string early and the file stops parsing.
+
+          Listing the gradient in background-image and the wash in
+          background-color composites them in one paint with no extra DOM.
+          Kept deliberately light (0.28) -- enough to unify the slides without
+          muddying the photography, which is the point of the hero.
+        */
+        .rh-hero-scrim {
           position: absolute;
           top: 0; right: 0; bottom: 0; left: 0;
-          z-index: 0;
-          background-image: inherit;
-          background-size: cover;
-          background-position: center center;
-          background-repeat: no-repeat;
-          transform: scale(1);
-          will-change: transform;
-        }
-        /*
-          Brand-green wash over the hero photos. The theme paints a flat
-          rgba(0,0,0,.4) here; this swaps that for the same dark green as
-          the top contact bar (#13482c). Because that green is itself dark,
-          it tints and darkens in one pass, so the white headings keep the
-          contrast the black overlay was providing. Scoped to .home-slider
-          so the other pages' headers keep the neutral dark overlay.
-        */
-        .home-slider .site-blocks-cover.overlay::before {
           z-index: 1;
-          background: rgba(19, 72, 44, 0.55);
+          background-color: rgba(19, 72, 44, 0.28);
+          background-image: linear-gradient(
+            to top,
+            rgba(10, 34, 22, 0.80) 0%,
+            rgba(10, 34, 22, 0.20) 55%,
+            rgba(10, 34, 22, 0.00) 100%
+          );
         }
-        .home-slider .site-blocks-cover > .container { position: relative; z-index: 2; }
-
-        /* animate.css leaves the fade on the default ease curve, which
-           does most of its work in the middle of the transition and so
-           still reads as a distinct "swap". linear dissolves at a constant
-           rate, which the eye registers far less. */
-        .home-slider .owl-item.animated { animation-timing-function: linear; }
-
-        /* Owl marks the visible slide .active, so the animation restarts on
-           every change. The :not(.owl-loaded) rule covers the very first
-           slide, which is painted before Owl has wrapped it in an .owl-item.
-
-           18s is deliberately far longer than the ~8.4s a slide is actually
-           on screen (7s hold + 1.4s crossfade): the zoom never reaches its
-           end and never visibly stops, so the photo is always drifting
-           gently instead of racing to a halt. linear rather than ease-out
-           for the same reason -- ease-out front-loads the movement, which is
-           exactly what read as "too fast". */
-        .home-slider .owl-item.active .site-blocks-cover::after,
-        .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover:first-child::after {
-          animation: heroKenBurns 18s linear both;
+        /* inner: relative mx-auto w-full max-w-6xl px-6 pb-20 */
+        .rh-hero-inner {
+          position: relative;
+          z-index: 2;
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+          max-width: 72rem;
+          padding: 0 1.5rem 5rem;
         }
+        /* h1: Lora.
+           !important on font-family because the .raleway-page rule above sets
+           Raleway on every heading with !important too, and would otherwise win.
 
-        @keyframes heroKenBurns {
-          from { transform: scale(1); }
-          to   { transform: scale(1.16); }
+           max-width is in ch (not rem) so the line breaks at roughly the same
+           WORD at every viewport, rather than landing differently at each
+           size. Kept to 3.5rem at the top end on purpose: the hero is
+           bottom-aligned under an absolutely-positioned navbar, so an
+           oversized headline is exactly what pushes the block up into the
+           menu. The ampersand is styled separately -- Lora's italic & is a
+           genuinely nicer glyph than its roman one. */
+        .rh-hero h1 {
+          margin: 0 0 1.75rem;
+          max-width: 18ch;
+          font-family: var(--font-lora), "Lora", Georgia, serif !important;
+          font-size: 2.5rem;
+          line-height: 1.2;
+          font-weight: 700;
+          color: #ffffff;
+          text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
         }
-
-        @media (prefers-reduced-motion: reduce) {
-          .home-slider .owl-item.active .site-blocks-cover::after,
-          .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover:first-child::after {
-            animation: none;
-          }
+        /* The ampersand deliberately stays at 600 while the rest of the line
+           is 700: Lora's italic & is a swash-ish glyph whose appeal is in its
+           thin strokes, and taking it to full bold thickens those away. It
+           reads as an accent rather than as lighter text. */
+        .rh-hero h1 .amp {
+          font-style: italic;
+          font-weight: 600;
+          color: #f0dfae;
+        }
+        @media (min-width: 640px) { .rh-hero h1 { font-size: 3.25rem; } }
+        @media (min-width: 1024px) { .rh-hero h1 { font-size: 4.25rem; } }
+        /* Separators are drawn as ::before on every item except
+           the first, so the list can wrap and reflow without leaving a
+           dangling dot at the end of a line. */
+        .rh-hero-facts {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem 1.5rem;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        /* Jost at 500, not 600: a geometric sans in wide-tracked caps reads
+           heavier than its weight suggests, and 600 fought the headline for
+           attention. Tracking is up to .2em -- geometric caps need more air
+           between them than a humanist face does. */
+        .rh-hero-facts li {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          font-family: var(--font-jost), "Jost", sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #ffffff;
+          text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        }
+        .rh-hero-facts li + li::before {
+          content: '';
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #c99e54;
+          flex: none;
+        }
+        .rh-hero-cta {
+          margin-top: 2rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.875rem;
+        }
+        .rh-hero-btn {
+          display: inline-block;
+          border-radius: 9999px;
+          padding: 0.875rem 2rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          letter-spacing: 0.03em;
+          transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease;
+        }
+        .rh-hero-btn:hover { transform: translateY(-2px); }
+        .rh-hero-btn-solid {
+          background: #c99e54;
+          color: #13482c;
+          box-shadow: 0 10px 24px -8px rgba(0,0,0,.45);
+        }
+        .rh-hero-btn-solid:hover { background: #f3e3a0; color: #13482c; }
+        /* Frosted rather than a plain outline: over a photo a 1px white
+           border alone can vanish against bright patches, and the blur also
+           keeps the label readable whatever is behind it. */
+        .rh-hero-btn-ghost {
+          border: 1px solid rgba(255, 255, 255, 0.55);
+          background: rgba(255, 255, 255, 0.08);
+          -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+          color: #ffffff;
+        }
+        .rh-hero-btn-ghost:hover { background: rgba(255, 255, 255, 0.18); border-color: #ffffff; color: #ffffff; }
+        @media (max-width: 575px) {
+          .rh-hero-btn { flex: 1 1 100%; text-align: center; }
         }
       `}</style>
-      <OwlCarousel className="slide-one-item home-slider owl-carousel" options={HERO_OPTIONS}>
-        <div
-          className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/roosty-photos/hero/property-overview.jpg)' }}
-          data-stellar-background-ratio="0.5"
-        >
-          <div className="container">
-            <div className="row align-items-center justify-content-center">
-              <div className="col-md-7 text-center" data-aos="fade">
-                <h1 className="mb-2">Discover Comfort</h1>
-                <h2 className="caption">Welcome to Roosty&apos;s Homes</h2>
-              </div>
-            </div>
+      <section className="rh-hero">
+        <HeroSlideshow />
+        <div className="rh-hero-scrim" />
+        <div className="rh-hero-inner">
+          <h1>
+            Experience Comfort, Elegance <span className="amp">&amp;</span> Relaxation
+          </h1>
+          <ul className="rh-hero-facts">
+            <li>Cottages &amp; Apartments</li>
+            <li>Bar &amp; Restaurant</li>
+            <li>Party Gardens</li>
+            <li>Secure Parking</li>
+          </ul>
+          <div className="rh-hero-cta">
+            <Link href="/contact" className="rh-hero-btn rh-hero-btn-solid">Book Your Stay</Link>
+            <Link href="/rooms" className="rh-hero-btn rh-hero-btn-ghost">Explore Rooms</Link>
           </div>
         </div>
-
-        <div
-          className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/roosty-photos/hero/restaurant-interior.jpg)' }}
-          data-stellar-background-ratio="0.5"
-        >
-          <div className="container">
-            <div className="row align-items-center justify-content-center">
-              <div className="col-md-7 text-center" data-aos="fade">
-                <h1 className="mb-2">Great Food &amp; Drinks</h1>
-                <h2 className="caption">Bar &bull; Restaurant &bull; Gardens</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="site-blocks-cover overlay"
-          style={{ backgroundImage: 'url(/roosty-photos/hero/cottages.jpg)' }}
-          data-stellar-background-ratio="0.5"
-        >
-          <div className="container">
-            <div className="row align-items-center justify-content-center">
-              <div className="col-md-7 text-center" data-aos="fade">
-                <h1 className="mb-2">Peaceful Stays</h1>
-                <h2 className="caption">Cottages &amp; Apartments</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-      </OwlCarousel>
+      </section>
 
       <div className="site-section">
         <style href="about-intro" precedence="theme">{`
@@ -254,14 +322,31 @@ export default function Home() {
           @media (max-width:767px) {
             .about-intro .about-title { font-size:30px; line-height:36px; }
             .about-intro .about-title br { display:none; }
+            /* On mobile the two columns stack, and in source order the photos
+               come first -- so a visitor scrolling out of the hero hits a
+               second block of imagery before being told anything. Flip the
+               order so the copy leads and the photos follow it.
+
+               Done with flex order (no backticks anywhere in this block --
+               it is a JS template literal) rather than by moving the markup: the
+               desktop layout wants photos on the LEFT, which is exactly what
+               source order gives it, so reordering the JSX would just push
+               the problem to the other breakpoint. .row is already
+               display:flex, so order works with no other layout change.
+
+               The margin swap matters too -- the image column carries the
+               gap between the two (mb-5), which sits in the wrong place once
+               it is the second item. */
+            .about-row .about-media { order:2; margin-bottom:0 !important; }
+            .about-row .about-copy { order:1; margin-bottom:2.5rem; }
           }
           @media (min-width:768px) and (max-width:991px) {
             .about-intro .about-title { font-size:36px; line-height:42px; }
           }
         `}</style>
         <div className="container">
-          <div className="row align-items-center">
-            <div className="col-md-6 mb-5 mb-md-0">
+          <div className="row align-items-center about-row">
+            <div className="col-md-6 mb-5 mb-md-0 about-media">
               <div className="img-border">
                 <a href="https://vimeo.com/28959265" className="popup-vimeo image-play">
                   <span className="icon-wrap">
@@ -273,7 +358,7 @@ export default function Home() {
 
               <img src="/theme/images/img_1.jpg" alt="Image" className="img-fluid image-absolute" fetchPriority="high" decoding="sync" />
             </div>
-            <div className="col-md-5 ml-auto">
+            <div className="col-md-5 ml-auto about-copy">
               {/*
                 Montana's about_info text structure: small eyebrow label, a
                 large two-line headline, then body copy. The eyebrow uses this

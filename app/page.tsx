@@ -133,7 +133,18 @@ export default function Home() {
           transform: scale(1);
           will-change: transform;
         }
-        .home-slider .site-blocks-cover.overlay::before { z-index: 1; }
+        /*
+          Brand-green wash over the hero photos. The theme paints a flat
+          rgba(0,0,0,.4) here; this swaps that for the same dark green as
+          the top contact bar (#13482c). Because that green is itself dark,
+          it tints and darkens in one pass, so the white headings keep the
+          contrast the black overlay was providing. Scoped to .home-slider
+          so the other pages' headers keep the neutral dark overlay.
+        */
+        .home-slider .site-blocks-cover.overlay::before {
+          z-index: 1;
+          background: rgba(19, 72, 44, 0.55);
+        }
         .home-slider .site-blocks-cover > .container { position: relative; z-index: 2; }
 
         /* Owl marks the visible slide .active, so the animation restarts on

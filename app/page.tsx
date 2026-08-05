@@ -22,8 +22,22 @@ const HERO_OPTIONS = {
   margin: 0,
   autoplay: true,
   pauseOnHover: false,
+  // Only the outgoing slide is animated, deliberately. Owl stacks the
+  // outgoing slide above the incoming one (.owl-animated-out is z-index 1,
+  // .owl-animated-in is z-index 0), so fading just the top one out over a
+  // fully opaque slide underneath is already a true crossfade. Adding
+  // animateIn:'fadeIn' as well meant the incoming slide was fading up from
+  // transparent *underneath* the one fading out, so for the middle of every
+  // transition neither slide was opaque and the page background showed
+  // through as a dip -- which is what made the swap so noticeable.
   animateOut: 'fadeOut',
-  animateIn: 'fadeIn',
+  // Owl's animate plugin writes smartSpeed onto the fade's
+  // animation-duration, so this is what controls how long the crossfade
+  // between two slides takes (its default, 250ms, reads as an abrupt cut).
+  smartSpeed: 1400,
+  // Time a slide is held before the next crossfade begins. Longer than the
+  // theme's 5s default so the hero feels unhurried rather than restless.
+  autoplayTimeout: 7000,
   nav: true,
   navText: ['<span class="icon-arrow_back">', '<span class="icon-arrow_forward">'],
 };
@@ -147,17 +161,30 @@ export default function Home() {
         }
         .home-slider .site-blocks-cover > .container { position: relative; z-index: 2; }
 
+        /* animate.css leaves the fade on the default ease curve, which
+           does most of its work in the middle of the transition and so
+           still reads as a distinct "swap". linear dissolves at a constant
+           rate, which the eye registers far less. */
+        .home-slider .owl-item.animated { animation-timing-function: linear; }
+
         /* Owl marks the visible slide .active, so the animation restarts on
            every change. The :not(.owl-loaded) rule covers the very first
-           slide, which is painted before Owl has wrapped it in an .owl-item. */
+           slide, which is painted before Owl has wrapped it in an .owl-item.
+
+           18s is deliberately far longer than the ~8.4s a slide is actually
+           on screen (7s hold + 1.4s crossfade): the zoom never reaches its
+           end and never visibly stops, so the photo is always drifting
+           gently instead of racing to a halt. linear rather than ease-out
+           for the same reason -- ease-out front-loads the movement, which is
+           exactly what read as "too fast". */
         .home-slider .owl-item.active .site-blocks-cover::after,
         .home-slider.owl-carousel:not(.owl-loaded) > .site-blocks-cover:first-child::after {
-          animation: heroKenBurns 6s ease-out both;
+          animation: heroKenBurns 18s linear both;
         }
 
         @keyframes heroKenBurns {
           from { transform: scale(1); }
-          to   { transform: scale(1.12); }
+          to   { transform: scale(1.16); }
         }
 
         @media (prefers-reduced-motion: reduce) {

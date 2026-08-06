@@ -11,22 +11,15 @@ export default function SiteNav() {
       <li className={pathname === '/' ? 'active' : undefined}>
         <Link href="/">Home</Link>
       </li>
-      <li className={`has-children${pathname === '/rooms' ? ' active' : ''}`}>
+      {/* No dropdown: every item it held (Standard/Family/Single Room, plus a
+          nested America/Europe/Asia/Africa list) was theme placeholder content
+          pointing at /rooms, so the menu just linked to itself four times over.
+          Dropping .has-children also removes the chevron the theme draws. */}
+      <li className={pathname === '/rooms' ? 'active' : undefined}>
         <Link href="/rooms">Rooms</Link>
-        <ul className="dropdown arrow-top">
-          <li><Link href="/rooms">Standard Room</Link></li>
-          <li><Link href="/rooms">Family Room</Link></li>
-          <li><Link href="/rooms">Single Room</Link></li>
-          <li className="has-children">
-            <Link href="/rooms">Rooms</Link>
-            <ul className="dropdown">
-              <li><Link href="/rooms">America</Link></li>
-              <li><Link href="/rooms">Europe</Link></li>
-              <li><Link href="/rooms">Asia</Link></li>
-              <li><Link href="/rooms">Africa</Link></li>
-            </ul>
-          </li>
-        </ul>
+      </li>
+      <li className={pathname === '/services' ? 'active' : undefined}>
+        <Link href="/services">Services</Link>
       </li>
       <li className={pathname === '/events' ? 'active' : undefined}>
         <Link href="/events">Events</Link>

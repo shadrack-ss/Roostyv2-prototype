@@ -7,7 +7,7 @@ export default function Events() {
     <>
       <div
         className="site-blocks-cover overlay page-hero"
-        style={{ backgroundImage: 'url(/theme/images/hero_1.jpg)' }}
+        style={{ backgroundImage: 'url(/roosty-photos/DJI_0002.jpg.jpg)' }}
         data-stellar-background-ratio="0.5"
       >
         {/* Same Ken Burns treatment as the homepage slider hero — see about/page.tsx for the full explanation. */}

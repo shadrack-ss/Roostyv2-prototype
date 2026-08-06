@@ -5,7 +5,7 @@ export default function About() {
     <>
       <div
         className="site-blocks-cover overlay page-hero"
-        style={{ backgroundImage: 'url(/theme/images/hero_1.jpg)' }}
+        style={{ backgroundImage: 'url(/roosty-photos/DJI_0002.jpg.jpg)' }}
         data-stellar-background-ratio="0.5"
       >
         {/*

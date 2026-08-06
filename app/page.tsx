@@ -6,14 +6,27 @@ import HeroSlideshow from './hero-slideshow';
 // Montana's own font (trying it out on the two Montana-derived sections
 // below, in place of the rest of the site's Playfair Display/Work Sans, to
 // see how it looks before committing).
-// Hero headline only. Lora is a warm, moderate-contrast serif -- unlike a
-// Didone (Playfair, Bodoni) its thin strokes never get truly hairline, which
-// is what keeps it solid over the hero photography. Italic is included for
-// the ampersand.
+// The hero headline is set in Plus Jakarta Sans, but that family is declared in
+// app/layout.tsx, not here -- the header wordmark uses it too and lives in the
+// layout, so it is loaded once there and --font-jakarta is already in scope by
+// the time this page renders.
+//
+// Why a sans at all: this is a deliberate move away from the serif line (Lora,
+// then Fraunces). The original constraint still holds and is easier to satisfy
+// here -- a sans has near-uniform stroke weight, so there are no thins to break
+// up over the hero photography. Jakarta over Inter because Inter is a UI face
+// tuned for small screen text and flattens to something fairly neutral at
+// 4.25rem, whereas Jakarta keeps warmth and distinctive letterforms that size.
+
+// Loaded for exactly one glyph: the hero's ampersand. Jakarta's italic is a
+// plain oblique, whereas Lora has a proper swash-like italic &, and that shape
+// is the entire reason the character is singled out in gold. Mixing a serif
+// accent into a sans headline is intentional, not an oversight.
+// Italic 600 only, so the download stays tiny for its one job.
 const lora = Lora({
   subsets: ['latin'],
-  weight: ['600', '700'],
-  style: ['normal', 'italic'],
+  weight: ['600'],
+  style: ['italic'],
   variable: '--font-lora',
   display: 'swap',
 });
@@ -58,6 +71,26 @@ const TESTIMONIALS_OPTIONS = {
     1000: { margin: 20, stagePadding: 0, items: 2 },
   },
 };
+
+// The gallery from the previous roostyshomes.com build, in its original order
+// and with its original photos (public/roosty-photos holds the same files the
+// old WordPress site served from wp-content/uploads/2026/01).
+//
+// That site served pre-cropped 550x660 thumbnails; only the full-size
+// originals are vendored here, and they are a mix of landscape and portrait
+// (AT8A2629 is a tall portrait shot). Left at their natural aspect they make
+// the 4-across grid ragged, so .gallery-tile below crops them to a single
+// ratio -- the same thing the old thumbnails were doing.
+const GALLERY = [
+  { src: 'AT8A2629.jpg-scaled.jpg', alt: 'Apartment living room with a wall-mounted TV and dining area' },
+  { src: 'AT8A2634.jpg.jpg', alt: 'Open-plan sitting room, dining table and kitchen in an apartment' },
+  { src: 'AT8A2560.jpg.jpg', alt: 'Apartment living room in teal with an orange sofa and kitchen counter' },
+  { src: 'AT8A2586.jpg.jpg', alt: 'Bedroom with a carved hardwood bed and mosquito net' },
+  { src: 'AT8A2584.jpg.jpg', alt: 'Blue bedroom with a dark carved four-poster bed and canopy' },
+  { src: 'AT8A2653.jpg.jpg', alt: 'Bedroom with a full-height wardrobe and a canopy over the bed' },
+  { src: 'AT8A2547.jpg.jpg', alt: 'Twin room with two single beds and gold curtains' },
+  { src: 'AT8A2527.jpg.jpg', alt: 'Guests being served at the indoor bar counter' },
+];
 
 const EVENTS_OPTIONS = {
   center: false,
@@ -185,7 +218,7 @@ export default function Home() {
           max-width: 72rem;
           padding: 0 1.5rem 5rem;
         }
-        /* h1: Lora.
+        /* h1: Plus Jakarta Sans.
            !important on font-family because the .raleway-page rule above sets
            Raleway on every heading with !important too, and would otherwise win.
 
@@ -194,23 +227,44 @@ export default function Home() {
            size. Kept to 3.5rem at the top end on purpose: the hero is
            bottom-aligned under an absolutely-positioned navbar, so an
            oversized headline is exactly what pushes the block up into the
-           menu. The ampersand is styled separately -- Lora's italic & is a
-           genuinely nicer glyph than its roman one. */
+           menu. */
         .rh-hero h1 {
           margin: 0 0 1.75rem;
           max-width: 18ch;
-          font-family: var(--font-lora), "Lora", Georgia, serif !important;
+          font-family: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif !important;
           font-size: 2.5rem;
-          line-height: 1.2;
-          font-weight: 700;
+          /* 1.35, up from 1.2. At 1.2 the two lines were nearly touching --
+             "Elegance"'s ascenders ran close into the descender of the comma
+             above. Deliberately restrained: at the 4.25rem desktop size every
+             0.1 here adds ~14px; the hero is bottom-aligned under an
+             absolutely-positioned navbar, so extra leading is another way to
+             push the block up into the menu. */
+          line-height: 1.35;
+          /* 800 is Plus Jakarta Sans's heaviest cut. Worth knowing: a sans set
+             this heavy over photography gains most of its readability from
+             sheer mass, so the text-shadow below is doing less work than it
+             was under the serifs -- but it stays, since the slideshow runs a
+             bright living-room frame where the white would otherwise flatten
+             into the wall behind it. */
+          font-weight: 800;
           color: #ffffff;
           text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
         }
-        /* The ampersand deliberately stays at 600 while the rest of the line
-           is 700: Lora's italic & is a swash-ish glyph whose appeal is in its
-           thin strokes, and taking it to full bold thickens those away. It
-           reads as an accent rather than as lighter text. */
+        /* The one glyph on the page set in a serif. Lora's italic & is a
+           swash-like form that Jakarta has no equivalent of, and that shape --
+           not just the gold -- is what makes the character read as an accent.
+
+           font-family needs no !important even though the h1 above uses it:
+           the .raleway-page rule at the top of this file deliberately omits
+           the span selector from its list, so nothing is forcing a family onto
+           this element and a plain declaration wins over inheritance.
+           (No backticks anywhere in this block -- it is a JS template literal.)
+
+           600 against the line's 800 is a wider gap than before, and that is
+           intentional -- the swash's appeal is in its thin strokes, which a
+           heavier cut would thicken away just as the headline got heavier. */
         .rh-hero h1 .amp {
+          font-family: var(--font-lora), "Lora", Georgia, serif;
           font-style: italic;
           font-weight: 600;
           color: #f0dfae;
@@ -294,7 +348,7 @@ export default function Home() {
         <div className="rh-hero-scrim" />
         <div className="rh-hero-inner">
           <h1>
-            Experience Comfort, Elegance <span className="amp">&amp;</span> Relaxation
+            Experience Comfort <span className="amp">&amp;</span> Relaxation
           </h1>
           <ul className="rh-hero-facts">
             <li>Cottages &amp; Apartments</li>
@@ -303,7 +357,7 @@ export default function Home() {
             <li>Secure Parking</li>
           </ul>
           <div className="rh-hero-cta">
-            <Link href="/contact" className="rh-hero-btn rh-hero-btn-solid">Book Your Stay</Link>
+            <Link href="/book" className="rh-hero-btn rh-hero-btn-solid">Book Your Stay</Link>
             <Link href="/rooms" className="rh-hero-btn rh-hero-btn-ghost">Explore Rooms</Link>
           </div>
         </div>
@@ -399,7 +453,7 @@ export default function Home() {
             <div className="col-md-6 col-lg-3 mb-5">
               <div className="hotel-room text-center">
                 <Link href="/rooms" className="d-block mb-0 thumbnail">
-                  <img src="/theme/images/img_3.jpg" alt="One Bedroom Occupancy" className="img-fluid" loading="lazy" decoding="async" />
+                  <img src="/roosty-photos/AT8A2643.jpg.jpg" alt="One Bedroom Occupancy" className="img-fluid" loading="lazy" decoding="async" />
                 </Link>
                 <div className="hotel-room-body">
                   <h3 className="heading mb-0"><Link href="/rooms">One Bedroom Occupancy</Link></h3>
@@ -411,7 +465,7 @@ export default function Home() {
             <div className="col-md-6 col-lg-3 mb-5">
               <div className="hotel-room text-center">
                 <Link href="/rooms" className="d-block mb-0 thumbnail">
-                  <img src="/theme/images/img_1.jpg" alt="Deluxe Cottage" className="img-fluid" loading="lazy" decoding="async" />
+                  <img src="/roosty-photos/AT8A2449.jpg.jpg" alt="Deluxe Cottage" className="img-fluid" loading="lazy" decoding="async" />
                 </Link>
                 <div className="hotel-room-body">
                   <h3 className="heading mb-0"><Link href="/rooms">Deluxe Cottage</Link></h3>
@@ -423,7 +477,7 @@ export default function Home() {
             <div className="col-md-6 col-lg-3 mb-5">
               <div className="hotel-room text-center">
                 <Link href="/rooms" className="d-block mb-0 thumbnail">
-                  <img src="/theme/images/img_2.jpg" alt="Two Bedroom Occupancy" className="img-fluid" loading="lazy" decoding="async" />
+                  <img src="/roosty-photos/AT8A2448.jpg.jpg" alt="Two Bedroom Occupancy" className="img-fluid" loading="lazy" decoding="async" />
                 </Link>
                 <div className="hotel-room-body">
                   <h3 className="heading mb-0"><Link href="/rooms">Two Bedroom Occupancy</Link></h3>
@@ -435,7 +489,7 @@ export default function Home() {
             <div className="col-md-6 col-lg-3 mb-5">
               <div className="hotel-room text-center">
                 <Link href="/rooms" className="d-block mb-0 thumbnail">
-                  <img src="/theme/images/img_4.jpg" alt="Family Suite" className="img-fluid" loading="lazy" decoding="async" />
+                  <img src="/roosty-photos/g-2.jpg" alt="Family Suite" className="img-fluid" loading="lazy" decoding="async" />
                 </Link>
                 <div className="hotel-room-body">
                   <h3 className="heading mb-0"><Link href="/rooms">Family Suite</Link></h3>
@@ -683,7 +737,12 @@ export default function Home() {
 
       <div
         className="py-5 upcoming-events"
-        style={{ backgroundImage: "url('/theme/images/hero_1.jpg')", backgroundAttachment: 'fixed' }}
+        style={{
+          backgroundImage: "url('/roosty-photos/background.jpg')",
+          backgroundAttachment: 'fixed',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+        }}
       >
         <div className="container">
           <div className="row align-items-center">
@@ -708,48 +767,22 @@ export default function Home() {
               <h2 className="mb-5">Our Gallery</h2>
             </div>
           </div>
+          <style href="gallery-tile" precedence="theme">{`
+            /* Crop every tile to one ratio so the 4-across grid stays even
+               whatever the photo's native orientation. The anchor (not the
+               img) carries the box because .image-popup is what the lightbox
+               binds to and what sits in the grid cell. */
+            .gallery-tile { display:block; aspect-ratio:4 / 3; overflow:hidden; }
+            .gallery-tile img { width:100%; height:100%; object-fit:cover; display:block; }
+          `}</style>
           <div className="row no-gutters">
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_1.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_1.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_2.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_2.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_3.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_3.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_4.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_4.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_4.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_4.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_5.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_5.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_6.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_6.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <a href="/theme/images/img_7.jpg" className="image-popup img-opacity">
-                <img src="/theme/images/img_7.jpg" alt="Image" className="img-fluid" loading="lazy" decoding="async" />
-              </a>
-            </div>
+            {GALLERY.map((photo) => (
+              <div className="col-md-6 col-lg-3" key={photo.src}>
+                <a href={`/roosty-photos/${photo.src}`} className="image-popup img-opacity gallery-tile">
+                  <img src={`/roosty-photos/${photo.src}`} alt={photo.alt} className="img-fluid" loading="lazy" decoding="async" />
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </div>

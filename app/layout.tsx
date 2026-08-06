@@ -1,8 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import SiteNav from "./site-nav";
 import ThemeRuntime from "./theme-runtime";
 import AnalyticsScripts from "./analytics-scripts";
+
+// Defined here rather than in app/page.tsx because the header wordmark lives in
+// this layout and is shared by every route, while the hero that also uses this
+// face is homepage-only. Declaring it once on <html> puts --font-jakarta in
+// scope for both and avoids two components each pulling the same family down.
+//
+// 700 for the wordmark, 800 for the hero headline.
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Roosty's Homes - Comfort, Great Food & Peaceful Stays in Mbarara",
@@ -16,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
       <head>
         <meta name="robots" content="noindex, nofollow" />
         {/*
@@ -134,7 +148,17 @@ export default function RootLayout({
               }
               /* text-shadow so the white links stay legible over whichever
                  hero photo happens to be behind them (some slides are bright). */
-              .site-navbar-wrap .site-navbar .site-logo a { color:#ffffff; text-shadow:0 1px 6px rgba(0,0,0,.45); }
+              /* The theme sets font-family:"Playfair Display" on .site-logo
+                 (the h2), which the link inherits. Declaring the family
+                 directly on the link beats that inheritance outright, so no
+                 !important or specificity war is needed. Matches the homepage
+                 hero, which uses the same face. */
+              /* The theme sets font-family:"Playfair Display" on .site-logo
+                 (the h2), which the link inherits. Declaring the family
+                 directly on the link beats that inheritance outright, so no
+                 !important or specificity war is needed. Matches the homepage
+                 hero, which uses the same face. */
+              .site-navbar-wrap .site-navbar .site-logo a { color:#ffffff; text-shadow:0 1px 6px rgba(0,0,0,.45); font-family:var(--font-jakarta),"Plus Jakarta Sans",system-ui,sans-serif; }
               .site-navbar-wrap .site-menu-toggle span { color:#ffffff; text-shadow:0 1px 6px rgba(0,0,0,.45); }
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a { color:#ffffff; font-weight:600; text-shadow:0 1px 6px rgba(0,0,0,.45); }
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a:hover { color:#c99e54; }
@@ -145,21 +169,22 @@ export default function RootLayout({
                  not the link's 10px horizontal padding. */
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li > a { position:relative; }
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.active > a { color:#ffffff !important; }
+              /* bottom:8px, not 4px. The theme gives these links
+                 padding:10px 10px, so the text box bottom sits 10px above the
+                 link's bottom edge -- at 4px the bar floated a full 6px clear
+                 of the label and read as detached from it. 8px leaves a 2px
+                 gap, which is enough to keep it off the glyphs (the labels are
+                 all-caps, so there are no descenders to clear). */
               .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.active > a::after {
                 content:'';
                 position:absolute;
                 left:10px;
                 right:10px;
-                bottom:4px;
+                bottom:8px;
                 height:2px;
                 background:#c99e54;
                 border-radius:2px;
               }
-              /* "Rooms" is a .has-children item: the theme gives it an extra
-                 20px of right padding to hold the dropdown chevron (drawn as
-                 ::before, so no clash with the bar above). Pull the bar in so
-                 it underlines the word only, not the chevron. */
-              .site-navbar-wrap .site-navbar .site-navigation .site-menu > li.has-children.active > a::after { right:30px; }
 
               .book-now-btn a { display:inline-block; background:#c99e54; color:#13482c; font-weight:600; padding:8px 22px; border-radius:30px; text-transform:uppercase; letter-spacing:.05em; font-size:12px; white-space:nowrap; transition:all .3s ease; }
               .book-now-btn a:hover { background:#ffffff; color:#13482c; }
@@ -274,7 +299,7 @@ export default function RootLayout({
                   </a>
                 </div>
                 <div className="book-now-btn">
-                  <Link href="/contact">Book Now</Link>
+                  <Link href="/book">Book Now</Link>
                 </div>
               </div>
             </div>
@@ -402,6 +427,9 @@ export default function RootLayout({
                     </li>
                     <li>
                       <Link href="/rooms">Rooms</Link>
+                    </li>
+                    <li>
+                      <Link href="/services">Services</Link>
                     </li>
                     <li>
                       <Link href="/events">Events</Link>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Poppins } from 'next/font/google';
-import DatepickerInit from '../datepicker-init';
+import RoomsBrowser from './rooms-browser';
 
 // Roberto uses Poppins.
 const poppins = Poppins({
@@ -10,20 +10,24 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-// Exact port of Roberto's room.html rooms area (breadcrumb, room list,
-// reservation sidebar, CTA, partners) with Roberto's own demo content. All of
-// Roberto's CSS is scoped under `.roberto-scope` so it cannot restyle the site's
-// shared (Suites) header/footer that wrap this page.
+// Port of Roberto's room.html rooms area (breadcrumb, room list, reservation
+// sidebar, CTA). All of Roberto's CSS is scoped under
+// `.roberto-scope` so it cannot restyle the site's shared (Suites)
+// header/footer that wrap this page.
 //
-// NOTE: the reservation form and price slider are visual only (not wired to any
-// booking backend) — hook them up when ready.
+// The room list and the reservation sidebar are both real now and live together
+// in <RoomsBrowser /> (a client component) -- they have to share state, since
+// pressing Check Available filters the list. Room data is in ./rooms-data.
+//
+// This page stays a server component: it owns the hero, the Roberto CSS, the
+// CTA, none of which need interactivity.
 export default function Rooms() {
   return (
     <>
       {/* Site (Suites) hero — kept as-is, outside the Roberto scope */}
       <div
         className="site-blocks-cover overlay page-hero"
-        style={{ backgroundImage: 'url(/theme/images/hero_1.jpg)' }}
+        style={{ backgroundImage: 'url(/roosty-photos/DJI_0002.jpg.jpg)' }}
         data-stellar-background-ratio="0.5"
       >
         {/* Same Ken Burns treatment as the homepage slider hero — see about/page.tsx for the full explanation. */}
@@ -106,7 +110,10 @@ export default function Rooms() {
         /* Room list */
         .roberto-scope .single-room-area { position:relative; z-index:1; display:flex; align-items:center; }
         .roberto-scope .single-room-area .room-thumbnail { position:relative; z-index:1; flex:0 0 50%; max-width:50%; width:50%; }
-        .roberto-scope .single-room-area .room-thumbnail img { border-radius:4px; width:100%; }
+        /* Roberto's demo shots were all one size; the real room photos are not
+           (3:2 alongside 4:3), and at width:100%/height:auto that leaves each
+           card a different height. Crop to a single ratio instead. */
+        .roberto-scope .single-room-area .room-thumbnail img { border-radius:4px; width:100%; aspect-ratio:3 / 2; object-fit:cover; display:block; }
         .roberto-scope .single-room-area .room-content { position:relative; z-index:1; padding-left:35px; }
         .roberto-scope .single-room-area .room-content h2 { font-size:30px; display:block; margin-bottom:5px; }
         .roberto-scope .single-room-area .room-content h4 { color:#f23a2e; margin-bottom:20px; font-size:24px; }
@@ -134,15 +141,10 @@ export default function Rooms() {
         .roberto-scope .hotel-reservation--area .form-control:focus { outline:none; border-bottom-color:#f23a2e; }
         .roberto-scope .hotel-reservation--area button { border-radius:30px!important; }
 
-        /* Price slider (jquery-ui markup, static) */
-        .roberto-scope .slider-range-price { position:relative; height:5px; background-color:#e8f1f8; border:1px solid #e8f1f8; }
-        .roberto-scope .slider-range-price .ui-slider-range { position:absolute; height:5px; background:#13482c; border:1px solid #e8f1f8; }
-        .roberto-scope .slider-range-price .ui-slider-handle { position:absolute; top:-7px; width:18px; height:18px; border-radius:50%; border:1px solid #13482c; background:#13482c; margin-left:-9px; outline:none; cursor:pointer; }
-
-        /* Pagination */
-        .roberto-scope .pagination { position:relative; z-index:1; display:flex; flex-wrap:wrap; padding-left:0; list-style:none; }
-        .roberto-scope .pagination .page-link { padding:12px 15px; color:#2a303b; border:none; background-color:#e8f1f8; margin-right:5px; border-radius:3px; display:block; }
-        .roberto-scope .pagination .page-link:hover, .roberto-scope .pagination .page-link:focus { background-color:#f23a2e; color:#fff; }
+        /* The jquery-ui price-slider rules that used to sit here are gone: the
+           slider is a real dual-range control now and carries its own CSS in
+           rooms-browser.tsx. The .pagination rules went with them -- Roberto's
+           demo pager was dropped when the list became four real rooms. */
 
         /* CTA */
         .roberto-scope .roberto-cta-area { position:relative; z-index:1; }
@@ -150,111 +152,12 @@ export default function Rooms() {
         .roberto-scope .roberto-cta-area .cta-text h2 { color:#fff; font-size:36px; margin-bottom:10px; }
         .roberto-scope .roberto-cta-area .cta-text h6 { margin-bottom:0; color:#fff; font-size:16px; font-weight:400; }
         .roberto-scope .text-right { text-align:right; }
-
-        /* Partners */
-        .roberto-scope .partner-logo-content { position:relative; z-index:1; padding-top:40px; padding-bottom:40px; }
-        .roberto-scope .partner-logo-content a { display:inline-block; }
-        .roberto-scope .partner-logo-content a img { max-height:50px; width:auto; }
       `}</style>
-
-      <DatepickerInit />
 
       {/* Rooms Area */}
       <div className="roberto-rooms-area section-padding-100-0">
         <div className="container">
-          <div className="row">
-            <div className="col-12 col-lg-8">
-              {[
-                { img: '43.jpg', name: 'Room View Sea' },
-                { img: '44.jpg', name: 'Small Room' },
-                { img: '45.jpg', name: 'Premium King Room' },
-                { img: '46.jpg', name: 'Room Vip King' },
-                { img: '47.jpg', name: 'Royal Room' },
-              ].map((room) => (
-                <div className="single-room-area mb-50" key={room.name}>
-                  <div className="room-thumbnail">
-                    <img src={`/roberto/img/${room.img}`} alt={room.name} loading="lazy" decoding="async" />
-                  </div>
-                  <div className="room-content">
-                    <h2>{room.name}</h2>
-                    <h4>400$ <span>/ Day</span></h4>
-                    <div className="room-feature">
-                      <h6>Size: <span>30 ft</span></h6>
-                      <h6>Capacity: <span>Max persion 5</span></h6>
-                      <h6>Bed: <span>King beds</span></h6>
-                      <h6>Services: <span>Wifi, television ...</span></h6>
-                    </div>
-                    <a href="#" className="btn view-detail-btn">View Details <i className="fa fa-long-arrow-right" aria-hidden="true"></i></a>
-                  </div>
-                </div>
-              ))}
-
-              {/* Pagination */}
-              <nav className="roberto-pagination mb-100">
-                <ul className="pagination">
-                  <li className="page-item"><a className="page-link" href="#">1</a></li>
-                  <li className="page-item"><a className="page-link" href="#">2</a></li>
-                  <li className="page-item"><a className="page-link" href="#">3</a></li>
-                  <li className="page-item"><a className="page-link" href="#">Next <i className="fa fa-angle-right"></i></a></li>
-                </ul>
-              </nav>
-            </div>
-
-            <div className="col-12 col-lg-4">
-              {/* Hotel Reservation — visual only, not wired */}
-              <div className="hotel-reservation--area mb-100">
-                <form>
-                  <div className="form-group mb-30">
-                    <label htmlFor="checkInDate">Date</label>
-                    <div className="input-daterange" id="datepicker">
-                      <div className="row no-gutters">
-                        <div className="col-6">
-                          <input type="text" className="input-small form-control" id="checkInDate" name="checkInDate" placeholder="Check In" autoComplete="off" />
-                        </div>
-                        <div className="col-6">
-                          <input type="text" className="input-small form-control" name="checkOutDate" placeholder="Check Out" autoComplete="off" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="form-group mb-30">
-                    <label htmlFor="guests">Guests</label>
-                    <div className="row">
-                      <div className="col-6">
-                        <select name="adults" id="guests" className="form-control" defaultValue="adults">
-                          <option value="adults">Adults</option>
-                          <option value="01">01</option><option value="02">02</option>
-                          <option value="03">03</option><option value="04">04</option>
-                          <option value="05">05</option><option value="06">06</option>
-                        </select>
-                      </div>
-                      <div className="col-6">
-                        <select name="children" id="children" className="form-control" defaultValue="children">
-                          <option value="children">Children</option>
-                          <option value="01">01</option><option value="02">02</option>
-                          <option value="03">03</option><option value="04">04</option>
-                          <option value="05">05</option><option value="06">06</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="form-group mb-50">
-                    <div className="slider-range">
-                      <div className="range-price">Max Price: $0 - $3000</div>
-                      <div className="slider-range-price">
-                        <div className="ui-slider-range" style={{ left: '0%', width: '100%' }}></div>
-                        <span className="ui-slider-handle" style={{ left: '0%' }} tabIndex={0}></span>
-                        <span className="ui-slider-handle" style={{ left: '100%' }} tabIndex={0}></span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <button type="button" className="btn roberto-btn w-100">Check Available</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
+          <RoomsBrowser />
         </div>
       </div>
 
@@ -280,22 +183,9 @@ export default function Rooms() {
         </div>
       </section>
 
-      {/* Partners */}
-      <div className="partner-area">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <div className="partner-logo-content d-flex align-items-center justify-content-between">
-                {['p1.png', 'p2.png', 'p3.png', 'p4.png', 'p5.png'].map((p) => (
-                  <a href="#" className="partner-logo" key={p}>
-                    <img src={`/roberto/img/${p}`} alt="" loading="lazy" decoding="async" />
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Roberto's partner-logo strip used to sit here. It was five invented
+          demo brands from the template, linked to "#" -- nothing to do with
+          Roosty's Homes -- so it is gone rather than left as fake credentials. */}
       </div>
     </>
   );

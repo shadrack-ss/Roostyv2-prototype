@@ -132,16 +132,16 @@ export default async function RootLayout({
           navbar and its scroll-triggered .scrolled state.
         */}
         <style href="roosty-header" precedence="theme">{`
-              /* One text face for the whole site. The theme sets Work Sans on
-                 body and Playfair Display on section headings; these rules
-                 have the same specificity and load later, so they win without
-                 !important. Icon fonts set their
-                 own family on their classes and are unaffected. The header
-                 wordmark and the homepage headline keep Plus Jakarta Sans.
-                 The theme's body colour (50% black) suited Work Sans but leaves
-                 Raleway's finer strokes faint, so text uses the same #4d4d4d
-                 the homepage and Services copy already set. */
-              body { font-family:var(--font-raleway),"Raleway",system-ui,sans-serif; color:#4d4d4d; }
+              /* One text face for the whole site: Raleway. The body font and
+                 colour are set inline on <body> below (not here), because the
+                 theme's own "body { font-family: Work Sans }" has the same
+                 specificity as any rule in this block and the winner would
+                 then depend on stylesheet order, which a tab that has been
+                 open across edits can get wrong. Inline styles don't.
+                 Section headings (theme: Playfair Display) are set here. Icon
+                 fonts set their own family on their classes and are
+                 unaffected. The header wordmark and the homepage headline
+                 keep Plus Jakarta Sans. */
               .section-heading h2 { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:500; }
               /* Deliberately NOT overridden: ".site-blocks-cover h1", the title
                  in every inner page's photo banner (Rooms, Services, About...).
@@ -301,7 +301,12 @@ export default async function RootLayout({
               }
         `}</style>
       </head>
-      <body>
+      {/*
+        The site's text face and colour. The theme's body colour (50% black)
+        suited Work Sans but leaves Raleway's finer strokes faint, so text
+        uses #4d4d4d, the same grey the homepage and Services copy set.
+      */}
+      <body style={{ fontFamily: 'var(--font-raleway), "Raleway", system-ui, sans-serif', color: "#4d4d4d" }}>
         <div className="site-wrap">
           <div className="site-mobile-menu">
             <div className="site-mobile-menu-header">

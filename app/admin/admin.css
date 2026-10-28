@@ -1,0 +1,31 @@
+/* Admin-only stylesheet. source(none) + explicit @source keeps Tailwind from
+   scanning the vendored theme under public/ for class names. */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../../components/admin";
+
+@theme {
+  --color-brand: #13482c;
+  --color-brand-dark: #0e3520;
+  --color-brand-soft: #eef4ef;
+  --color-gold: #c99e54;
+  --color-gold-soft: #f7efdf;
+  --color-ink: #1d2621;
+  --color-muted: #66706a;
+  --color-line: #e2e7e3;
+  --color-canvas: #f5f7f5;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* Rich text editor content. */
+.rte-content p { margin: 0 0 .6em; }
+.rte-content h3 { font-size: 1.05rem; font-weight: 600; margin: .8em 0 .4em; }
+.rte-content ul { list-style: disc; margin-left: 1.25rem; }
+.rte-content ol { list-style: decimal; margin-left: 1.25rem; }
+.rte-content a { color: var(--color-brand); text-decoration: underline; }
+.rte-content blockquote { border-left: 3px solid var(--color-gold); padding-left: .75rem; color: var(--color-muted); }

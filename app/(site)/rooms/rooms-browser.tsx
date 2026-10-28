@@ -195,19 +195,19 @@ export default function RoomsBrowser({ rooms, note, emptyTitle, emptyText }: Pro
           ) : (
             results.map((room) => (
               <div className="single-room-area mb-50" key={room.id}>
-                <div className="room-thumbnail">
+                <Link href={`/rooms/${room.slug}`} className="room-thumbnail d-block">
                   <img src={room.imageUrl} alt={room.name} loading="lazy" decoding="async" />
-                </div>
+                </Link>
                 <div className="room-content">
-                  <h2>{room.name}</h2>
+                  <h2><Link href={`/rooms/${room.slug}`}>{room.name}</Link></h2>
                   <h4>{formatUGX(room.price)} <span>/ night</span></h4>
                   <div className="room-feature">
                     {room.size && <h6>Size: <span>{room.size}</span></h6>}
                     <h6>Capacity: <span>{room.capacity} guests</span></h6>
                   </div>
                   {room.description && <p className="mb-3">{room.description}</p>}
-                  <Link href={`/book?room=${room.slug}`} className="btn view-detail-btn">
-                    Book This Room <i className="fa fa-long-arrow-right" aria-hidden="true"></i>
+                  <Link href={`/rooms/${room.slug}`} className="btn view-detail-btn">
+                    View Room <i className="fa fa-long-arrow-right" aria-hidden="true"></i>
                   </Link>
                 </div>
               </div>

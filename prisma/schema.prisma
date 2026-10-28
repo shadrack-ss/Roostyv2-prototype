@@ -107,8 +107,16 @@ model Room {
   price       Int
   size        String   @default("")
   capacity    Int      @default(2)
+  /// Cover photo: the tile, the card and the room page banner.
   imageUrl    String
+  /// Short line shown on the tile and at the top of the room page.
   description String   @default("")
+  /// More photos for the room page gallery, in display order.
+  photos      String[] @default([])
+  /// One feature per line, shown as a checklist on the room page.
+  features    String   @default("")
+  /// Sanitised rich text: the fuller write-up on the room page.
+  details     String   @default("")
   /// Shown in the "Our Rooms" block on the homepage.
   featured    Boolean  @default(true)
   published   Boolean  @default(true)

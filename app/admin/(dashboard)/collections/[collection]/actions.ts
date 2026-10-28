@@ -6,7 +6,7 @@ import type { FormState } from "@/components/admin/resource-form";
 import { Prisma } from "@/generated/prisma/client";
 import { recordAudit, requireAdmin } from "@/lib/auth-guard";
 import { COLLECTIONS, isCollectionKey, type CollectionDef, type CollectionKey } from "@/lib/content/collections";
-import { parseFields, replacedImages, slugify } from "@/lib/content/parse";
+import { imagePaths, parseFields, replacedImages, slugify } from "@/lib/content/parse";
 import { delegateFor, listOrder, type Row } from "@/lib/content/store";
 import { deleteUpload } from "@/lib/storage";
 
@@ -23,13 +23,6 @@ function refresh(key: CollectionKey, def: CollectionDef) {
 
 function titleOf(def: CollectionDef, row: Record<string, unknown>): string {
   return String(row[def.titleField] ?? "").slice(0, 80) || def.singular;
-}
-
-function imagesOf(def: CollectionDef, row: Record<string, unknown>): string[] {
-  return def.fields
-    .filter((f) => f.type === "image")
-    .map((f) => row[f.name])
-    .filter((v): v is string => typeof v === "string" && v !== "");
 }
 
 export async function saveItem(
@@ -97,7 +90,7 @@ export async function deleteItem(collection: string, id: string): Promise<void> 
   const row = await db.findUnique({ where: { id } });
   if (!row) return;
   await db.delete({ where: { id } });
-  for (const url of imagesOf(def, row)) await deleteUpload(url);
+  for (const url of imagePaths(def.fields, row)) await deleteUpload(url);
 
   await recordAudit(actor, { action: `${def.model}.delete`, entity: def.model, entityId: id, summary: titleOf(def, row) });
   refresh(collection, def);

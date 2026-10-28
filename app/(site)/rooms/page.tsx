@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Poppins } from 'next/font/google';
 import { PageHero } from '@/components/site/blocks';
 import { getRooms, getSection } from '@/lib/content/queries';
+import RoomTiles from './room-tiles';
 import RoomsBrowser from './rooms-browser';
 import { toRoomCard } from './rooms-data';
 
@@ -19,9 +20,11 @@ const poppins = Poppins({
 // `.roberto-scope` so it cannot restyle the site's shared (Suites)
 // header/footer that wrap this page.
 //
-// The room list and the reservation sidebar are both real now and live together
-// in <RoomsBrowser /> (a client component) -- they have to share state, since
-// pressing Check Available filters the list. Room data is in ./rooms-data.
+// Two layouts, picked in Admin > Pages > Rooms > Layout:
+//   tiles - <RoomTiles />, full-bleed photo tiles (the default)
+//   list  - <RoomsBrowser />, Roberto's room list with the price/guests search
+//           sidebar (a client component, since the search filters the list)
+// Both link each room to its own page at /rooms/<slug>.
 //
 // This page stays a server component: it owns the hero, the Roberto CSS, the
 // CTA, none of which need interactivity.
@@ -30,8 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Rooms() {
-  const [hero, filter, cta, rooms] = await Promise.all([
+  const [hero, display, filter, cta, rooms] = await Promise.all([
     getSection('rooms.hero'),
+    getSection('rooms.display'),
     getSection('rooms.filter'),
     getSection('rooms.cta'),
     getRooms(),
@@ -133,19 +137,36 @@ export default async function Rooms() {
         .roberto-scope .roberto-cta-area .cta-text h2 { color:#fff; font-size:36px; margin-bottom:10px; }
         .roberto-scope .roberto-cta-area .cta-text h6 { margin-bottom:0; color:#fff; font-size:16px; font-weight:400; }
         .roberto-scope .text-right { text-align:right; }
+
+        /* Intro line above either layout, and the gap the full-bleed tiles
+           need before the CTA (the list layout brings its own spacing). */
+        .roberto-scope .rooms-intro { max-width:44rem; margin:0 auto; padding:70px 15px 50px; text-align:center; }
+        .roberto-scope .rooms-intro p { font-size:18px; line-height:1.7; }
+        .roberto-scope .rooms-tiles-area { margin-bottom:100px; }
       `}</style>
 
-      {/* Rooms Area */}
-      <div className="roberto-rooms-area section-padding-100-0">
-        <div className="container">
-          <RoomsBrowser
-            rooms={rooms.map(toRoomCard)}
-            note={filter.note}
-            emptyTitle={filter.emptyTitle}
-            emptyText={filter.emptyText}
-          />
+      {display.intro && (
+        <div className="rooms-intro">
+          <p>{display.intro}</p>
         </div>
-      </div>
+      )}
+
+      {display.layout === 'list' ? (
+        <div className={`roberto-rooms-area ${display.intro ? '' : 'section-padding-100-0'}`}>
+          <div className="container">
+            <RoomsBrowser
+              rooms={rooms.map(toRoomCard)}
+              note={filter.note}
+              emptyTitle={filter.emptyTitle}
+              emptyText={filter.emptyText}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="rooms-tiles-area">
+          <RoomTiles rooms={rooms.map(toRoomCard)} />
+        </div>
+      )}
 
       {/* Call To Action */}
       <section className="roberto-cta-area">

@@ -12,7 +12,7 @@ import type { Field } from "./fields";
  * pointed at directly or cleared). An upload wins over the text box.
  */
 
-export type ParsedValue = string | number | boolean | Date;
+export type ParsedValue = string | string[] | number | boolean | Date;
 
 export type ParseResult =
   | { ok: true; data: Record<string, ParsedValue>; newUploads: string[] }
@@ -28,9 +28,11 @@ export async function parseFields(fields: Field[], formData: FormData): Promise<
   // Validate every upload before saving any, so a bad second file doesn't
   // leave an orphaned first one on disk.
   for (const field of fields) {
-    if (field.type !== "image") continue;
-    const error = validateImageFile(formData.get(field.name) as File | null);
-    if (error) return { ok: false, error: `${field.label}: ${error}` };
+    if (field.type !== "image" && field.type !== "gallery") continue;
+    for (const file of formData.getAll(field.name)) {
+      const error = validateImageFile(typeof file === "string" ? null : file);
+      if (error) return { ok: false, error: `${field.label}: ${error}` };
+    }
   }
 
   for (const field of fields) {
@@ -80,6 +82,24 @@ export async function parseFields(fields: Field[], formData: FormData): Promise<
         continue;
       }
 
+      case "gallery": {
+        // Kept photos arrive in display order as <name>__keep; new uploads
+        // are appended after them.
+        const kept = formData
+          .getAll(`${field.name}__keep`)
+          .map((v) => String(v).trim())
+          .filter(Boolean);
+        const added: string[] = [];
+        for (const file of formData.getAll(field.name)) {
+          if (typeof file === "string" || file.size === 0) continue;
+          const url = await saveImage(file);
+          newUploads.push(url);
+          added.push(url);
+        }
+        data[field.name] = [...kept, ...added];
+        continue;
+      }
+
       case "richtext": {
         const clean = sanitizeRichText(typeof raw === "string" ? raw : "");
         const empty = clean.replace(/<[^>]*>/g, "").trim() === "";
@@ -93,6 +113,9 @@ export async function parseFields(fields: Field[], formData: FormData): Promise<
         if (text && field.type === "email" && !email.safeParse(text).success) {
           return { ok: false, error: `${field.label} must be a valid email address.` };
         }
+        if (text && field.type === "select" && !field.options?.some((o) => o.value === text)) {
+          return { ok: false, error: `${field.label}: choose one of the listed options.` };
+        }
         if (text && field.type === "url" && !httpUrl.safeParse(text).success) {
           return { ok: false, error: `${field.label} must be a full link starting with http:// or https://.` };
         }
@@ -104,15 +127,23 @@ export async function parseFields(fields: Field[], formData: FormData): Promise<
   return { ok: true, data, newUploads };
 }
 
-/** Image values that were in `before` but are gone from `after` - candidates for deletion. */
-export function replacedImages(fields: Field[], before: Record<string, unknown>, after: Record<string, unknown>): string[] {
+/** Every image path an item holds, across image and gallery fields. */
+export function imagePaths(fields: Field[], row: Record<string, unknown>): string[] {
   const out: string[] = [];
   for (const field of fields) {
-    if (field.type !== "image") continue;
-    const old = before[field.name];
-    if (typeof old === "string" && old !== "" && old !== after[field.name]) out.push(old);
+    const value = row[field.name];
+    if (field.type === "image" && typeof value === "string" && value) out.push(value);
+    if (field.type === "gallery" && Array.isArray(value)) {
+      out.push(...value.filter((v): v is string => typeof v === "string" && v !== ""));
+    }
   }
   return out;
+}
+
+/** Image paths that were in `before` but are gone from `after` - candidates for deletion. */
+export function replacedImages(fields: Field[], before: Record<string, unknown>, after: Record<string, unknown>): string[] {
+  const still = new Set(imagePaths(fields, after));
+  return imagePaths(fields, before).filter((path) => !still.has(path));
 }
 
 export function slugify(text: string): string {

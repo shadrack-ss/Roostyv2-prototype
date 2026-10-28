@@ -504,11 +504,11 @@ export default async function Home() {
               {featuredRooms.map((room) => (
                 <div className="col-md-6 col-lg-3 mb-5" key={room.id}>
                   <div className="hotel-room text-center">
-                    <Link href="/rooms" className="d-block mb-0 thumbnail">
+                    <Link href={`/rooms/${room.slug}`} className="d-block mb-0 thumbnail">
                       <img src={room.imageUrl} alt={room.name} className="img-fluid" loading="lazy" decoding="async" />
                     </Link>
                     <div className="hotel-room-body">
-                      <h3 className="heading mb-0"><Link href="/rooms">{room.name}</Link></h3>
+                      <h3 className="heading mb-0"><Link href={`/rooms/${room.slug}`}>{room.name}</Link></h3>
                       <strong className="price">{formatUGX(room.price)} / per night</strong>
                       <span className="d-block text-muted small mt-2">
                         {room.capacity} Guests{room.size && <> &middot; {room.size}</>}

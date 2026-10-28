@@ -77,6 +77,12 @@ export const getRooms = cache(async () => {
   return prisma.room.findMany(visible);
 });
 
+/** One published room for its own page, or null so the page can 404. */
+export const getRoomBySlug = cache(async (slug: string) => {
+  await connection();
+  return prisma.room.findFirst({ where: { slug, published: true } });
+});
+
 export const getServices = cache(async () => {
   await connection();
   return prisma.service.findMany(visible);

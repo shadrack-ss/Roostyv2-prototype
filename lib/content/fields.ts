@@ -13,6 +13,8 @@ export type FieldType =
   | "textarea"
   | "richtext"
   | "image"
+  /** Several images in order, stored as a string[]. */
+  | "gallery"
   | "url"
   | "email"
   | "number"
@@ -38,7 +40,7 @@ export type Field = {
   min?: number;
 };
 
-export type FieldValues = Record<string, string | number | boolean | Date | null>;
+export type FieldValues = Record<string, string | string[] | number | boolean | Date | null>;
 
 /** The icons available in the theme's flaticon font. */
 export const ICON_OPTIONS = [

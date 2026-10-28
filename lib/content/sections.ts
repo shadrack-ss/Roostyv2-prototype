@@ -227,9 +227,32 @@ export const SECTIONS = {
 
   // --- Rooms ----------------------------------------------------------------
   "rooms.hero": pageHero("rooms", "Comfortable Stays", "Rooms & Cottages"),
+  "rooms.display": section({
+    page: "rooms",
+    label: "Layout",
+    description: "How the rooms are shown. Either way, clicking a room opens its own page.",
+    fields: [
+      {
+        name: "layout",
+        label: "Layout",
+        type: "select",
+        required: true,
+        options: [
+          { value: "tiles", label: "Photo tiles - large photos, two across" },
+          { value: "list", label: "List with search - filter by price and guests" },
+        ],
+      },
+      { name: "intro", label: "Introduction", type: "textarea", rows: 2, help: "Shown above the rooms. Leave empty to hide." },
+    ],
+    defaults: {
+      layout: "tiles",
+      intro: "Choose the room that fits your stay - from a cozy one-bedroom to a full family suite.",
+    },
+  }),
   "rooms.filter": section({
     page: "rooms",
     label: "Room search",
+    description: "Only used by the \"List with search\" layout.",
     fields: [
       { name: "note", label: "Note under the search button", type: "textarea", rows: 2, help: TOKEN_HELP },
       { name: "emptyTitle", label: "No results title", type: "text" },
@@ -239,6 +262,23 @@ export const SECTIONS = {
       note: "Filters our rooms by price and party size. We confirm dates with you directly - call {phone} or send a booking request.",
       emptyTitle: "Nothing in that range",
       emptyText: "Try widening the price range or lowering the guest count.",
+    },
+  }),
+  "rooms.detail": section({
+    page: "rooms",
+    label: "Room pages",
+    description: "Text shared by every room's own page. The photos, features and description are set on each room.",
+    fields: [
+      { name: "bookLabel", label: "Book button text", type: "text", half: true },
+      { name: "featuresHeading", label: "Features heading", type: "text", half: true },
+      { name: "backLabel", label: "Back link text", type: "text", half: true },
+      { name: "callText", label: "Text above the phone number", type: "text", half: true },
+    ],
+    defaults: {
+      bookLabel: "Book This Room",
+      featuresHeading: "What's in the room",
+      backLabel: "All rooms",
+      callText: "Questions? Call us",
     },
   }),
   "rooms.cta": section({

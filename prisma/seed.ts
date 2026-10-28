@@ -28,6 +28,64 @@ async function seedIfEmpty(label: string, count: () => Promise<number>, create: 
   console.log(`  ${label}: seeded`);
 }
 
+// Room page content for the demo rooms: gallery photos, features and the
+// fuller description. Used when the rooms are first created, and to backfill
+// rooms seeded before room pages existed (see main()).
+const ROOM_PAGES: Record<string, { photos: string[]; features: string; details: string }> = {
+  "one-bedroom": {
+    photos: ["AT8A2645.jpg.jpg", "AT8A2653.jpg.jpg", "AT8A2655.jpg.jpg", "AT8A2639.jpg.jpg"].map(photo),
+    features: [
+      "Double bed with mosquito net",
+      "Fully fitted kitchen",
+      "Private bathroom with hot shower",
+      "Free Wi-Fi",
+      "Smart TV",
+      "Daily housekeeping",
+    ].join("\n"),
+    details:
+      "<p>A self-contained apartment for two, with a bright double bedroom, its own kitchen and a private bathroom. Cook for yourself or order from the restaurant and eat in.</p><p>Ideal for longer stays and business trips, with a quiet spot to work and secure parking outside.</p>",
+  },
+  "deluxe-cottage": {
+    photos: ["AT8A2466.jpg.jpg", "AT8A2468.jpg-1.jpg", "AT8A2456.jpg.jpg", "AT8A2436.jpg-scaled.jpg"].map(photo),
+    features: [
+      "King-size bed",
+      "Freestanding bathtub",
+      "Private garden lawn",
+      "Free Wi-Fi",
+      "Tea and coffee station",
+      "Room service from the restaurant",
+    ].join("\n"),
+    details:
+      "<p>Our most private option: a standalone cottage set in its own stretch of garden, with a king-size bed and a deep freestanding bath.</p><p>A favourite for anniversaries and quiet weekends away. Breakfast can be brought to your door.</p>",
+  },
+  "two-bedroom": {
+    photos: ["AT8A2471.jpg.jpg", "AT8A2472.jpg.jpg", "AT8A2547.jpg.jpg", "AT8A2557.jpg.jpg", "AT8A2488.jpg.jpg"].map(photo),
+    features: [
+      "Two bedrooms, double and twin",
+      "Sleeps up to six",
+      "Shared living area",
+      "Hot shower",
+      "Free Wi-Fi",
+      "Secure parking",
+    ].join("\n"),
+    details:
+      "<p>Two bedrooms around a shared living space, sleeping up to six. Good for friends travelling together or a family that wants a little more room.</p><p>One room has a double bed and the other two singles, and extra beds can be arranged on request.</p>",
+  },
+  "family-suite": {
+    photos: ["AT8A2586.jpg.jpg", "AT8A2584.jpg.jpg", "AT8A2629.jpg.jpg", "AT8A2631.jpg.jpg", "AT8A2562.jpg.jpg", "AT8A2572.jpg.jpg"].map(photo),
+    features: [
+      "Master bedroom with four-poster bed",
+      "Spacious sitting room",
+      "Dining area",
+      "Two bathrooms",
+      "Smart TV",
+      "Short walk to the kids' play area",
+    ].join("\n"),
+    details:
+      "<p>Our largest suite, with a grand four-poster master bedroom, a spacious sitting room and a dining area for family meals.</p><p>The kids' play area and the gardens are a short walk away, so parents can relax at a table while the children play in full view.</p>",
+  },
+};
+
 async function main() {
   const email = process.env.ADMIN_EMAIL?.toLowerCase().trim();
   const password = process.env.ADMIN_PASSWORD;
@@ -104,9 +162,17 @@ async function main() {
           imageUrl: photo("g-2.jpg"),
           description: "Our largest suite, a short walk from the kids' play area.",
         },
-      ].map((room, i) => ({ ...room, sortOrder: i })),
+      ].map((room, i) => ({ ...room, ...ROOM_PAGES[room.slug], sortOrder: i })),
     }),
   );
+
+  // Rooms seeded before room pages existed have no gallery yet. Fill in the
+  // demo page content for those only; a room someone has added photos to is
+  // left exactly as it is.
+  for (const [slug, page] of Object.entries(ROOM_PAGES)) {
+    const { count } = await prisma.room.updateMany({ where: { slug, photos: { isEmpty: true } }, data: page });
+    if (count) console.log(`  room ${slug}: added demo photos, features and details`);
+  }
 
   await seedIfEmpty("services", () => prisma.service.count(), () =>
     prisma.service.createMany({

@@ -13,11 +13,12 @@ export default function RoomTiles({ rooms }: { rooms: RoomCard[] }) {
         .room-tiles { display:grid; grid-template-columns:1fr; }
         @media (min-width:768px) { .room-tiles { grid-template-columns:1fr 1fr; } }
 
-        /* Taller than wide on phones so the photo still reads as a room
-           rather than a strip; a calmer 16:10 once two sit side by side. */
-        .room-tile { position:relative; display:block; aspect-ratio:4 / 5; overflow:hidden; background:#0a2216; color:#fff; }
-        @media (min-width:768px) { .room-tile { aspect-ratio:16 / 10; } }
-        @media (min-width:1400px) { .room-tile { aspect-ratio:16 / 9; } }
+        /* Tall tiles, so the photo reads as a whole room rather than a
+           widescreen strip: 2:3 portrait on phones, and square once two sit
+           side by side (a 16:9 tile crops a bedroom to little more than the
+           bed). */
+        .room-tile { position:relative; display:block; aspect-ratio:2 / 3; overflow:hidden; background:#0a2216; color:#fff; }
+        @media (min-width:768px) { .room-tile { aspect-ratio:1 / 1; } }
 
         .room-tiles .room-tile img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; transition:transform .8s ease; }
         .room-tiles .room-tile:hover img, .room-tiles .room-tile:focus-visible img { transform:scale(1.04); }

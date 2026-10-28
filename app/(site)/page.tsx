@@ -13,21 +13,11 @@ import {
 } from '@/lib/content/queries';
 import { formatUGX } from '@/lib/money';
 import OwlCarousel from './owl-carousel';
-import HeroSlideshow from './hero-slideshow';
+import HeroSlider from './hero-slider';
 
-// Raleway, the site's text face, and Plus Jakarta Sans are both loaded in
-// app/(site)/layout.tsx and are in scope on every page.
-// The hero headline is set in Plus Jakarta Sans, but that family is declared in
-// the layout, not here -- the header wordmark uses it too and lives in the
-// layout, so it is loaded once there and --font-jakarta is already in scope by
-// the time this page renders.
-//
-// Why a sans at all: this is a deliberate move away from the serif line (Lora,
-// then Fraunces). The original constraint still holds and is easier to satisfy
-// here -- a sans has near-uniform stroke weight, so there are no thins to break
-// up over the hero photography. Jakarta over Inter because Inter is a UI face
-// tuned for small screen text and flattens to something fairly neutral at
-// 4.25rem, whereas Jakarta keeps warmth and distinctive letterforms that size.
+// Raleway, the site's text face, and Plus Jakarta Sans (the hero headline and
+// the header wordmark) are both loaded in app/(site)/layout.tsx and are in
+// scope on every page.
 
 // Loaded for exactly one glyph: the hero's ampersand. Jakarta's italic is a
 // plain oblique, whereas Lora has a proper swash-like italic &, and that shape
@@ -54,11 +44,8 @@ const jost = Jost({
 });
 
 
-// NOTE: the hero used to be a jQuery Owl Carousel driven by a HERO_OPTIONS
-// config here. It has been replaced wholesale by the other build's hero
-// (see <HeroSlideshow /> + .rh-hero below), which is pure CSS and needs no
-// Owl config — so that constant is gone. Owl still drives the Latest Updates
-// and testimonials carousels further down, hence the import above stays.
+// The hero is <HeroSlider /> (./hero-slider.tsx). Owl still drives the Latest
+// Updates and testimonials carousels further down.
 
 const TESTIMONIALS_OPTIONS = {
   center: false,
@@ -92,22 +79,6 @@ const EVENTS_OPTIONS = {
     1200: { margin: 20, stagePadding: 0, items: 3, nav: true, dots: true },
   },
 };
-
-// The headline's "&" is set in the gold Lora italic accent. Splitting on it
-// here lets the admin write a plain sentence and still get the styling.
-function Headline({ text }: { text: string }) {
-  const parts = text.split('&');
-  return (
-    <>
-      {parts.map((part, i) => (
-        <span key={i}>
-          {i > 0 && <span className="amp">&amp;</span>}
-          {part}
-        </span>
-      ))}
-    </>
-  );
-}
 
 const POST_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
@@ -158,12 +129,10 @@ export default async function Home() {
         class has been rewritten as plain CSS below; the structure, colours,
         type scale, spacing and animation are otherwise identical.
 
-        What was here before: a jQuery Owl Carousel of three
-        .site-blocks-cover slides, each with its own heading/caption/CTAs and
-        a CSS Ken Burns zoom. All of it is gone -- replaced by
-        <HeroSlideshow />, a dependency-free CSS crossfade. The site's own
-        top contact bar and navbar (in app/layout.tsx) are untouched and
-        still float over this section, exactly as before.
+        The slides, their per-slide text and the fly-in entrance are in
+        <HeroSlider /> (./hero-slider.tsx); the layout and type styles for
+        its .rh-hero-* elements stay here. The site's top contact bar and
+        navbar (in app/(site)/layout.tsx) float over this section.
 
         Palette is the other build's theme tokens, inlined since there is no
         Tailwind @theme here: forest-950 #0a2216, forest-900 #0d2b1c,
@@ -230,8 +199,11 @@ export default async function Home() {
           max-width: 72rem;
           padding: 0 1.5rem 5rem;
         }
-        /* h1: Plus Jakarta Sans, the one heading on the site not set in
-           Raleway (it matches the header wordmark).
+        /* The slide arrows sit 2rem from the bottom and are 52px tall, so
+           their top edge is 84px up. 5.5rem (88px) keeps the text as low as
+           it can go while still clearing them at every width. */
+        @media (min-width: 768px) { .rh-hero-inner { padding-bottom: 5.5rem; } }
+        /* h1: Plus Jakarta Sans 800, matching the header wordmark.
 
            max-width is in ch (not rem) so the line breaks at roughly the same
            WORD at every viewport, rather than landing differently at each
@@ -243,24 +215,26 @@ export default async function Home() {
           margin: 0 0 1.75rem;
           max-width: 18ch;
           font-family: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif !important;
-          font-size: 2.5rem;
-          /* 1.35, up from 1.2. At 1.2 the two lines were nearly touching --
-             "Elegance"'s ascenders ran close into the descender of the comma
-             above. Deliberately restrained: at the 4.25rem desktop size every
-             0.1 here adds ~14px; the hero is bottom-aligned under an
-             absolutely-positioned navbar, so extra leading is another way to
-             push the block up into the menu. */
-          line-height: 1.35;
-          /* 800 is Plus Jakarta Sans's heaviest cut. Worth knowing: a sans set
-             this heavy over photography gains most of its readability from
-             sheer mass, so the text-shadow below is doing less work than it
-             was under the serifs -- but it stays, since the slideshow runs a
+          font-size: 2.25rem;
+          line-height: 1.25;
+          /* The text-shadow stays even at this weight: the slideshow runs a
              bright living-room frame where the white would otherwise flatten
              into the wall behind it. */
           font-weight: 800;
           color: #ffffff;
           text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
         }
+        /* The slide's line under the headline, in the site's Raleway. */
+        .rh-hero-text {
+          max-width: 34rem;
+          margin: -0.5rem 0 1.75rem;
+          font-size: 1.125rem;
+          font-weight: 400;
+          line-height: 1.55;
+          color: #ffffff;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+        }
+        @media (min-width: 640px) { .rh-hero-text { font-size: 1.25rem; } }
         /* The one glyph on the page set in a serif. Lora's italic & is a
            swash-like form that Jakarta has no equivalent of, and that shape --
            not just the gold -- is what makes the character read as an accent.
@@ -280,8 +254,10 @@ export default async function Home() {
           font-weight: 600;
           color: #f0dfae;
         }
-        @media (min-width: 640px) { .rh-hero h1 { font-size: 3.25rem; } }
-        @media (min-width: 1024px) { .rh-hero h1 { font-size: 4.25rem; } }
+        /* Smaller than the original 3.25rem / 4.25rem, so the headline
+           covers less of the photo now a label and a line sit with it. */
+        @media (min-width: 640px) { .rh-hero h1 { font-size: 2.75rem; } }
+        @media (min-width: 1024px) { .rh-hero h1 { font-size: 3.5rem; } }
         /* Separators are drawn as ::before on every item except
            the first, so the list can wrap and reflow without leaving a
            dangling dot at the end of a line. */
@@ -354,30 +330,24 @@ export default async function Home() {
           .rh-hero-btn { flex: 1 1 100%; text-align: center; }
         }
       `}</style>
-      <section className="rh-hero">
-        {slides.length > 0 && <HeroSlideshow slides={slides} />}
-        <div className="rh-hero-scrim" />
-        <div className="rh-hero-inner">
-          <h1>
-            <Headline text={hero.headline} />
-          </h1>
-          {highlights.length > 0 && (
-            <ul className="rh-hero-facts">
-              {highlights.map((h) => (
-                <li key={h}>{h}</li>
-              ))}
-            </ul>
-          )}
-          <div className="rh-hero-cta">
-            {hero.primaryLabel && (
-              <Link href={hero.primaryHref || '/book'} className="rh-hero-btn rh-hero-btn-solid">{hero.primaryLabel}</Link>
-            )}
-            {hero.secondaryLabel && (
-              <Link href={hero.secondaryHref || '/rooms'} className="rh-hero-btn rh-hero-btn-ghost">{hero.secondaryLabel}</Link>
-            )}
-          </div>
-        </div>
-      </section>
+      <HeroSlider
+        slides={slides.map((s) => ({
+          imageUrl: s.imageUrl,
+          alt: s.alt,
+          heading: s.heading,
+          text: s.text,
+          buttonLabel: s.buttonLabel,
+          buttonHref: s.buttonHref,
+        }))}
+        fallback={{
+          headline: hero.headline,
+          primaryLabel: hero.primaryLabel,
+          primaryHref: hero.primaryHref,
+          secondaryLabel: hero.secondaryLabel,
+          secondaryHref: hero.secondaryHref,
+        }}
+        highlights={highlights}
+      />
 
       <div className="site-section">
         <style href="about-intro" precedence="theme">{`

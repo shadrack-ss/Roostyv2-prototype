@@ -86,14 +86,20 @@ model PageSection {
 
 // --- Collections ----------------------------------------------------------
 
+/// One homepage hero photo with its own text. Any empty text field falls
+/// back to the "Hero" section on the Home page (headline, main button).
 model HeroSlide {
-  id        String   @id @default(cuid())
-  imageUrl  String
-  alt       String   @default("")
-  published Boolean  @default(true)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  imageUrl    String
+  alt         String   @default("")
+  heading     String   @default("")
+  text        String   @default("")
+  buttonLabel String   @default("")
+  buttonHref  String   @default("")
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([published, sortOrder])
 }

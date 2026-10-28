@@ -28,6 +28,58 @@ async function seedIfEmpty(label: string, count: () => Promise<number>, create: 
   console.log(`  ${label}: seeded`);
 }
 
+// The homepage hero: each photo with the text that flies in over it.
+const HERO_SLIDES = [
+  {
+    imageUrl: photo("real/exterior-01.jpg"),
+    alt: "Guest houses set among landscaped gardens",
+    heading: "Experience Comfort & Relaxation",
+    text: "Cozy cottages and apartments set in quiet, green gardens.",
+    buttonLabel: "Book Your Stay",
+    buttonHref: "/book",
+  },
+  {
+    imageUrl: photo("real/exterior-02.jpg"),
+    alt: "Sports court with hills behind",
+    heading: "Room to Play & Unwind",
+    text: "A sports court, open lawns and hillside views, all within the gates.",
+    buttonLabel: "See Our Services",
+    buttonHref: "/services",
+  },
+  {
+    imageUrl: photo("real/exterior-03.jpg"),
+    alt: "Kids' play area with a trampoline, slides and a seesaw",
+    heading: "Fun for the Little Ones",
+    text: "A fenced play area with a trampoline, slides and swings, in full view of the garden tables.",
+    buttonLabel: "Plan a Family Stay",
+    buttonHref: "/rooms/family-suite",
+  },
+  {
+    imageUrl: photo("real/family-exterior.jpg"),
+    alt: "Cottage with a verandah and its own garden",
+    heading: "Your Own Quiet Corner",
+    text: "Private cottages with a verandah and a garden of their own.",
+    buttonLabel: "Book a Cottage",
+    buttonHref: "/book?room=deluxe-cottage",
+  },
+  {
+    imageUrl: photo("real/livingroom-01.jpg"),
+    alt: "Bright apartment living room",
+    heading: "Space to Settle In",
+    text: "Bright living rooms, full kitchens and comfortable bedrooms for short or long stays.",
+    buttonLabel: "Check Availability",
+    buttonHref: "/book",
+  },
+  {
+    imageUrl: photo("real/livingroom-02.jpg"),
+    alt: "Apartment dining and sitting area",
+    heading: "Home Comforts & Great Rates",
+    text: "Ask about weekly and monthly rates on our apartments.",
+    buttonLabel: "Contact Us",
+    buttonHref: "/contact",
+  },
+];
+
 // Room page content for the demo rooms: gallery photos, features and the
 // fuller description. Used when the rooms are first created, and to backfill
 // rooms seeded before room pages existed (see main()).
@@ -111,17 +163,15 @@ async function main() {
   console.log("  settings: ensured");
 
   await seedIfEmpty("hero slides", () => prisma.heroSlide.count(), () =>
-    prisma.heroSlide.createMany({
-      data: [
-        { imageUrl: photo("real/exterior-01.jpg"), alt: "Cottages set among the gardens" },
-        { imageUrl: photo("real/exterior-02.jpg"), alt: "The main house from the garden path" },
-        { imageUrl: photo("real/exterior-03.jpg"), alt: "Guest cottages at dusk" },
-        { imageUrl: photo("real/family-exterior.jpg"), alt: "Family cottage with its own lawn" },
-        { imageUrl: photo("real/livingroom-01.jpg"), alt: "Bright apartment living room" },
-        { imageUrl: photo("real/livingroom-02.jpg"), alt: "Apartment sitting area" },
-      ].map((slide, i) => ({ ...slide, sortOrder: i })),
-    }),
+    prisma.heroSlide.createMany({ data: HERO_SLIDES.map((slide, i) => ({ ...slide, sortOrder: i })) }),
   );
+
+  // Slides seeded before slides had their own text get it now. Only slides
+  // still without a headline are touched, so edited slides are left alone.
+  for (const slide of HERO_SLIDES) {
+    const { count } = await prisma.heroSlide.updateMany({ where: { imageUrl: slide.imageUrl, heading: "" }, data: slide });
+    if (count) console.log(`  hero slide ${slide.imageUrl}: added demo text`);
+  }
 
   await seedIfEmpty("rooms", () => prisma.room.count(), () =>
     prisma.room.createMany({

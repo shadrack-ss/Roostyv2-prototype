@@ -72,14 +72,14 @@ export const SECTIONS = {
   "home.hero": section({
     page: "home",
     label: "Hero",
-    description: "The full-screen opening section. Its photos are managed under Collections > Hero slides.",
+    description: "The full-screen opening section. Each photo and its own text is managed under Collections > Hero slides; the headline and main button here are used for any slide that leaves them empty.",
     fields: [
       {
         name: "headline",
         label: "Headline",
         type: "text",
         required: true,
-        help: "An \"&\" in the headline is drawn in the gold accent style.",
+        help: "Used when a hero slide has no headline of its own. An \"&\" is drawn in the gold accent style.",
       },
       { name: "highlights", label: "Highlights", type: "textarea", rows: 4, help: "One per line, shown in a row under the headline." },
       { name: "primaryLabel", label: "Main button text", type: "text", half: true },

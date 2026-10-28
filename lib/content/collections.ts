@@ -39,17 +39,28 @@ export const COLLECTIONS = {
   heroSlides: {
     label: "Hero slides",
     singular: "Hero slide",
-    description: "The photos that crossfade behind the homepage headline.",
+    description:
+      "The homepage hero: each slide is a photo with its own text, which flies in when the slide appears. Empty text fields use the Hero block on the Home page.",
     model: "heroSlide",
     fields: [
       { name: "imageUrl", label: "Photo", type: "image", required: true, help: "Wide landscape photos work best." },
-      { name: "alt", label: "Description", type: "text", help: "Describes the photo for screen readers." },
+      { name: "alt", label: "Photo description", type: "text", help: "Describes the photo for screen readers." },
+      {
+        name: "heading",
+        label: "Headline",
+        type: "text",
+        help: "An \"&\" is drawn in the gold accent style. Empty uses the Home page headline.",
+      },
+      { name: "text", label: "Line under the headline", type: "textarea", rows: 2, help: "Leave empty to hide." },
+      { name: "buttonLabel", label: "Button text", type: "text", half: true, help: "Empty uses the Home page's main button." },
+      { name: "buttonHref", label: "Button link", type: "text", half: true, placeholder: "/book" },
       published,
     ],
-    titleField: "alt",
+    titleField: "heading",
     columns: [
       { field: "imageUrl", label: "Photo", kind: "image" },
-      { field: "alt", label: "Description" },
+      { field: "heading", label: "Headline" },
+      { field: "buttonLabel", label: "Button" },
       { field: "published", label: "Visible", kind: "toggle" },
     ],
     orderBy: "sortOrder",

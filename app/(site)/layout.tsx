@@ -133,16 +133,20 @@ export default async function RootLayout({
         */}
         <style href="roosty-header" precedence="theme">{`
               /* One text face for the whole site. The theme sets Work Sans on
-                 body and Playfair Display on page banner titles and section
-                 headings; these rules have the same specificity and load
-                 later, so they win without !important. Icon fonts set their
+                 body and Playfair Display on section headings; these rules
+                 have the same specificity and load later, so they win without
+                 !important. Icon fonts set their
                  own family on their classes and are unaffected. The header
                  wordmark and the homepage headline keep Plus Jakarta Sans.
                  The theme's body colour (50% black) suited Work Sans but leaves
                  Raleway's finer strokes faint, so text uses the same #4d4d4d
                  the homepage and Services copy already set. */
               body { font-family:var(--font-raleway),"Raleway",system-ui,sans-serif; color:#4d4d4d; }
-              .site-blocks-cover h1, .section-heading h2 { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:500; }
+              .section-heading h2 { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:500; }
+              /* Deliberately NOT overridden: ".site-blocks-cover h1", the title
+                 in every inner page's photo banner (Rooms, Services, About...).
+                 Those keep the theme's Playfair Display at its heaviest weight,
+                 the serif look the banners had before the site moved to Raleway. */
 
               /* Header stacks over the hero; both scroll away (non-sticky). */
               .site-wrap { position:relative; }

@@ -1,0 +1,17 @@
+# Local PostgreSQL for development: `docker compose up -d`.
+# Port 5434 so it can sit next to another Postgres already using 5432/5433.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: haven
+      POSTGRES_PASSWORD: haven
+      POSTGRES_DB: haven_homes
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "HeroSlide" ADD COLUMN     "buttonHref" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "buttonLabel" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "heading" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "text" TEXT NOT NULL DEFAULT '';

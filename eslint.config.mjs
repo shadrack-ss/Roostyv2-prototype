@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendored third-party theme assets — never lint these.
     "public/**",
+    // Generated Prisma client.
+    "generated/**",
+    // Local HTTrack mirrors kept for reference (gitignored, never imported).
+    "montana/**",
+    "roosts/**",
   ]),
 ]);
 

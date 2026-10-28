@@ -1,0 +1,268 @@
+// Content is split into three kinds, each with one storage pattern:
+//
+//   Settings     - SiteSettings, a single row of brand and contact details.
+//   Sections     - PageSection, one JSON row per fixed block of page copy. The
+//                  shape of each block lives in lib/content/sections.ts, not
+//                  here, so adding a section never needs a migration.
+//   Collections  - one model per repeating list (rooms, team, posts...), all
+//                  sharing published/sortOrder so one generic admin screen can
+//                  list, order and toggle any of them.
+//
+// Plus the operational tables: bookings, contact messages, admins, audit log.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Admin ----------------------------------------------------------------
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String   @default("")
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+/// Append-only record of every admin write. No foreign key to Admin on
+/// purpose: the log has to outlive the account that acted, so the email is
+/// copied in and adminId is only a loose reference.
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String?
+  adminEmail String
+  /// Dotted verb, e.g. "room.update".
+  action     String
+  entity     String
+  entityId   String?
+  /// Readable label captured at write time, so the log still makes sense
+  /// after the row is renamed or deleted.
+  summary    String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// --- Settings & sections --------------------------------------------------
+
+model SiteSettings {
+  id              String   @id @default("singleton")
+  brandName       String   @default("Haven Homes")
+  initials        String   @default("HH")
+  tagline         String   @default("Comfort, Great Food & Peaceful Stays")
+  footerBlurb     String   @default("")
+  address         String   @default("")
+  mapUrl          String   @default("")
+  phonePrimary    String   @default("")
+  phoneSecondary  String   @default("")
+  whatsapp        String   @default("")
+  emailPrimary    String   @default("")
+  emailSecondary  String   @default("")
+  facebookUrl     String   @default("")
+  instagramUrl    String   @default("")
+  xUrl            String   @default("")
+  tiktokUrl       String   @default("")
+  youtubeUrl      String   @default("")
+  seoTitle        String   @default("")
+  seoDescription  String   @default("")
+  /// Where booking and contact notifications are emailed. Empty = SMTP_USER.
+  notifyEmail     String   @default("")
+  updatedAt       DateTime @updatedAt
+}
+
+/// One fixed block of copy on a public page, e.g. "home.about". `data` is
+/// validated against the section's fields in lib/content/sections.ts and
+/// merged over that file's defaults when read.
+model PageSection {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+// --- Collections ----------------------------------------------------------
+
+/// One homepage hero photo with its own text. Any empty text field falls
+/// back to the "Hero" section on the Home page (headline, main button).
+model HeroSlide {
+  id          String   @id @default(cuid())
+  imageUrl    String
+  alt         String   @default("")
+  heading     String   @default("")
+  text        String   @default("")
+  buttonLabel String   @default("")
+  buttonHref  String   @default("")
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  /// Nightly rate in whole UGX. A number, not a display string, because the
+  /// rooms filter and the booking estimate both do arithmetic on it.
+  price       Int
+  size        String   @default("")
+  capacity    Int      @default(2)
+  /// Cover photo: the tile, the card and the room page banner.
+  imageUrl    String
+  /// Short line shown on the tile and at the top of the room page.
+  description String   @default("")
+  /// More photos for the room page gallery, in display order.
+  photos      String[] @default([])
+  /// One feature per line, shown as a checklist on the room page.
+  features    String   @default("")
+  /// Sanitised rich text: the fuller write-up on the room page.
+  details     String   @default("")
+  /// Shown in the "Our Rooms" block on the homepage.
+  featured    Boolean  @default(true)
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  /// Small label above the title, e.g. "Eat".
+  eyebrow     String   @default("")
+  title       String
+  /// Sanitised rich text.
+  body        String   @default("")
+  imageUrl    String
+  alt         String   @default("")
+  buttonLabel String   @default("")
+  buttonHref  String   @default("")
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model Amenity {
+  id        String   @id @default(cuid())
+  /// A flaticon class from the theme's icon font, e.g. "flaticon-pool".
+  icon      String
+  label     String
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  alt       String   @default("")
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  /// Short context line under the name, e.g. "Stayed in the Deluxe Cottage".
+  detail    String   @default("")
+  quote     String
+  photoUrl  String   @default("")
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String   @default("")
+  photoUrl  String   @default("")
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+/// News and events. Shown on /events and in "Latest Updates" on the homepage.
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  imageUrl  String   @default("")
+  excerpt   String
+  author    String   @default("")
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, date])
+}
+
+// --- Inbox ----------------------------------------------------------------
+
+enum BookingStatus {
+  NEW
+  CONFIRMED
+  CANCELLED
+}
+
+/// A booking request from /book. Room name and rate are copied in at request
+/// time so the record stays accurate if the room is later renamed, repriced
+/// or deleted.
+model Booking {
+  id         String        @id @default(cuid())
+  roomId     String?
+  roomName   String
+  nightlyRate Int
+  fullName   String
+  email      String
+  phone      String
+  checkIn    DateTime      @db.Date
+  checkOut   DateTime      @db.Date
+  adults     Int
+  children   Int
+  message    String        @default("")
+  status     BookingStatus @default(NEW)
+  /// Internal note staff can leave, never shown to the guest.
+  staffNote  String        @default("")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String   @default("")
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([read, createdAt])
+}

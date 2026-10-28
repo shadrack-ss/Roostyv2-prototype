@@ -438,7 +438,10 @@ export default async function Home() {
                  photos share one 3:2 crop and the cards one height per row,
                  which stops a portrait or tall photo making its card taller
                  than its neighbour. */
-              .home-rooms .hotel-room { height:100%; }
+              /* A small radius on the top corners only. overflow:hidden on
+                 the card clips the photo (and its hover zoom) to it, and
+                 rounds the white card behind, so no square corner peeks out. */
+              .home-rooms .hotel-room { height:100%; border-radius:8px 8px 0 0; overflow:hidden; }
               .home-rooms .hotel-room > .thumbnail img { display:block; width:100%; aspect-ratio:3 / 2; object-fit:cover; }
               .home-rooms .hotel-room .heading { font-size:24px; }
               .home-rooms .hotel-room .price { display:block; margin-top:.35rem; font-size:1.15rem; }

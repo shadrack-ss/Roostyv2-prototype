@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Raleway, Lora, Jost } from 'next/font/google';
+import { Lora, Jost } from 'next/font/google';
 import { AmenitiesGrid, EventsBand, GalleryGrid, SectionHeading } from '@/components/site/blocks';
 import { Lines, Paragraphs, initialsOf, videoPopupClass } from '@/components/site/text';
 import {
@@ -15,11 +15,10 @@ import { formatUGX } from '@/lib/money';
 import OwlCarousel from './owl-carousel';
 import HeroSlideshow from './hero-slideshow';
 
-// Montana's own font (trying it out on the two Montana-derived sections
-// below, in place of the rest of the site's Playfair Display/Work Sans, to
-// see how it looks before committing).
+// Raleway, the site's text face, and Plus Jakarta Sans are both loaded in
+// app/(site)/layout.tsx and are in scope on every page.
 // The hero headline is set in Plus Jakarta Sans, but that family is declared in
-// app/layout.tsx, not here -- the header wordmark uses it too and lives in the
+// the layout, not here -- the header wordmark uses it too and lives in the
 // layout, so it is loaded once there and --font-jakarta is already in scope by
 // the time this page renders.
 //
@@ -51,13 +50,6 @@ const jost = Jost({
   subsets: ['latin'],
   weight: ['400', '500'],
   variable: '--font-jost',
-  display: 'swap',
-});
-
-const raleway = Raleway({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-raleway',
   display: 'swap',
 });
 
@@ -159,35 +151,7 @@ export default async function Home() {
   const highlights = hero.highlights.split(/\r?\n/).map((h) => h.trim()).filter(Boolean);
 
   return (
-    <div className={`raleway-page ${raleway.variable} ${lora.variable} ${jost.variable}`}>
-      {/*
-        Trying Raleway (Montana's own font) across the whole homepage, not
-        just the two Montana-derived sections, to see how it looks against
-        the rest of the site. !important is deliberate here: the theme's own
-        style.css sets font-family on body and on specific heading selectors
-        (.section-heading h2, .hotel-room h3, etc.) with equal or higher
-        specificity than a plain class selector, so a normal cascade wouldn't
-        win. This is scoped to .raleway-page only — nothing outside the
-        homepage (header, footer, other routes) is affected. Revert by
-        deleting this <style> block and the wrapping div/raleway import if
-        the look isn't a keeper.
-      */}
-      <style href="raleway-page" precedence="theme">{`
-        .raleway-page, .raleway-page h1, .raleway-page h2, .raleway-page h3,
-        .raleway-page h4, .raleway-page h5, .raleway-page h6, .raleway-page p,
-        .raleway-page a, .raleway-page blockquote {
-          font-family: var(--font-raleway), "Raleway", sans-serif !important;
-        }
-        /* Deliberately NOT included above: span. Every icon on this theme
-           (carousel nav arrows, play buttons, amenity icons) is a <span
-           className="icon-..."> whose font-family is set to icomoon/
-           flaticon with !important — a blanket ".raleway-page span" rule
-           directly overrides that on the icon spans too (not just plain
-           text spans), which is what made every icon render blank. Plain
-           text spans (the About eyebrow, the video caption) still pick up
-           Raleway through ordinary inheritance from this wrapper, so they
-           don't need to be listed here. */
-      `}</style>
+    <div className={`${lora.variable} ${jost.variable}`}>
       {/*
         HERO - ported wholesale from an earlier Tailwind build. That
         design is Tailwind-based and this project is not, so every utility
@@ -266,9 +230,8 @@ export default async function Home() {
           max-width: 72rem;
           padding: 0 1.5rem 5rem;
         }
-        /* h1: Plus Jakarta Sans.
-           !important on font-family because the .raleway-page rule above sets
-           Raleway on every heading with !important too, and would otherwise win.
+        /* h1: Plus Jakarta Sans, the one heading on the site not set in
+           Raleway (it matches the header wordmark).
 
            max-width is in ch (not rem) so the line breaks at roughly the same
            WORD at every viewport, rather than landing differently at each
@@ -477,7 +440,7 @@ export default async function Home() {
                 large two-line headline, then body copy. The eyebrow uses this
                 site's gold rather than Montana's blue.
               */}
-              <div className={`about-intro ${raleway.variable}`}>
+              <div className="about-intro">
                 {about.eyebrow && <span className="about-eyebrow">{about.eyebrow}</span>}
                 <h2 className="about-title">
                   <Lines text={about.title} />
@@ -581,7 +544,7 @@ export default async function Home() {
         image of the earlier About section). Its own padding-top:200px is
         what creates the gap after the video banner.
       */}
-      <div className={`montana-food-scope ${raleway.variable}`}>
+      <div className="montana-food-scope">
         <style href="montana-food" precedence="theme">{`
           /* Same purged-bootstrap gap as the first About section: this build's
              bootstrap.min.css ships no col-xl or col-lg-5/col-lg-7 classes,

@@ -35,7 +35,7 @@ export default function RoomTiles({ rooms }: { rooms: RoomCard[] }) {
         .room-tile-body { position:absolute; left:0; right:0; bottom:0; z-index:1; padding:1.5rem 1.25rem; }
         @media (min-width:768px) { .room-tile-body { padding:2rem 2.25rem; } }
 
-        .room-tiles .room-tile h2 { margin:0 0 .35rem; font-family:"Playfair Display",Georgia,serif; font-size:1.5rem; line-height:1.25; font-weight:700; color:#fff; }
+        .room-tiles .room-tile h2 { margin:0 0 .35rem; font-family:var(--font-raleway),"Raleway",sans-serif; font-size:1.5rem; line-height:1.25; font-weight:600; color:#fff; }
         @media (min-width:992px) { .room-tiles .room-tile h2 { font-size:2rem; } }
         .room-tile-meta { display:block; font-size:.95rem; color:rgba(255,255,255,.85); margin-bottom:.75rem; }
         .room-tile-price { font-size:1.15rem; font-weight:700; color:#f0dfae; }

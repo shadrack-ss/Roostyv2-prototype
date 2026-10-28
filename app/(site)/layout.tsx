@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Raleway } from "next/font/google";
 import { getSection, getSettings } from "@/lib/content/queries";
 import { mapHref, telHref } from "@/lib/content/settings";
 import SiteNav from "./site-nav";
@@ -18,6 +18,15 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["700", "800"],
   variable: "--font-jakarta",
+  display: "swap",
+});
+
+// The site's text face, for body copy and headings on every public page.
+// Loaded once here; pages that style text directly use var(--font-raleway).
+const raleway = Raleway({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-raleway",
   display: "swap",
 });
 
@@ -48,7 +57,7 @@ export default async function RootLayout({
   const emails = [settings.emailPrimary, settings.emailSecondary].filter(Boolean);
 
   return (
-    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
+    <html lang="en" className={`${jakarta.variable} ${raleway.variable}`} suppressHydrationWarning>
       <head>
         <meta name="robots" content="noindex, nofollow" />
         {/*
@@ -123,6 +132,18 @@ export default async function RootLayout({
           navbar and its scroll-triggered .scrolled state.
         */}
         <style href="roosty-header" precedence="theme">{`
+              /* One text face for the whole site. The theme sets Work Sans on
+                 body and Playfair Display on page banner titles and section
+                 headings; these rules have the same specificity and load
+                 later, so they win without !important. Icon fonts set their
+                 own family on their classes and are unaffected. The header
+                 wordmark and the homepage headline keep Plus Jakarta Sans.
+                 The theme's body colour (50% black) suited Work Sans but leaves
+                 Raleway's finer strokes faint, so text uses the same #4d4d4d
+                 the homepage and Services copy already set. */
+              body { font-family:var(--font-raleway),"Raleway",system-ui,sans-serif; color:#4d4d4d; }
+              .site-blocks-cover h1, .section-heading h2 { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:500; }
+
               /* Header stacks over the hero; both scroll away (non-sticky). */
               .site-wrap { position:relative; }
 

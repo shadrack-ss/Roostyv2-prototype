@@ -1,19 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Poppins } from 'next/font/google';
 import { PageHero } from '@/components/site/blocks';
 import { getRooms, getSection } from '@/lib/content/queries';
 import RoomTiles from './room-tiles';
 import RoomsBrowser from './rooms-browser';
 import { toRoomCard } from './rooms-data';
-
-// Roberto uses Poppins.
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-poppins',
-  display: 'swap',
-});
 
 // Port of Roberto's room.html rooms area (breadcrumb, room list, reservation
 // sidebar, CTA). All of Roberto's CSS is scoped under
@@ -46,12 +37,12 @@ export default async function Rooms() {
       {/* Site hero - kept outside the Roberto scope */}
       <PageHero data={hero} />
 
-      <div className={`roberto-scope ${poppins.variable}`}>
+      <div className="roberto-scope">
       <style>{`
         @font-face { font-family:'RobertoFA'; src:url(/roberto/fonts/fontawesome-webfont.woff2) format('woff2'), url(/roberto/fonts/fontawesome-webfont.woff) format('woff'); font-weight:normal; font-style:normal; font-display:swap; }
 
-        .roberto-scope { font-family:var(--font-poppins),"Poppins",sans-serif; font-weight:400; font-size:16px; color:#636a76; }
-        .roberto-scope h1,.roberto-scope h2,.roberto-scope h3,.roberto-scope h4,.roberto-scope h5,.roberto-scope h6 { font-family:var(--font-poppins),"Poppins",sans-serif; color:#2a303b; line-height:1.3; font-weight:500; margin:0; }
+        .roberto-scope { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:400; font-size:16px; color:#636a76; }
+        .roberto-scope h1,.roberto-scope h2,.roberto-scope h3,.roberto-scope h4,.roberto-scope h5,.roberto-scope h6 { font-family:var(--font-raleway),"Raleway",sans-serif; color:#2a303b; line-height:1.3; font-weight:500; margin:0; }
         .roberto-scope p { line-height:1.7; color:#636a76; font-size:16px; font-weight:400; margin:0; }
         .roberto-scope a { color:#2a303b; text-decoration:none; transition-duration:500ms; }
         .roberto-scope img { max-width:100%; height:auto; }

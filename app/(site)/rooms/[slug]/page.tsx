@@ -36,10 +36,10 @@ export default async function RoomPage({ params }: Params) {
       <style href="room-page" precedence="theme">{`
         .room-page .room-back { display:inline-block; margin-bottom:1.5rem; font-size:14px; color:#13482c; }
         .room-page .room-back:hover { color:#c99e54; text-decoration:none; }
-        .room-page .room-lead { font-size:1.2rem; line-height:1.7; color:#1f1f1f; margin-bottom:1.5rem; }
+        .room-page .room-lead { font-size:1.15rem; line-height:1.7; font-weight:500; color:#2a303b; margin-bottom:1.5rem; }
         .room-page .room-details p { line-height:1.8; margin-bottom:1.25rem; }
         .room-page .room-details ul, .room-page .room-details ol { padding-left:1.25rem; margin-bottom:1.25rem; }
-        .room-page h2.room-subhead { font-family:"Playfair Display",Georgia,serif; font-size:1.6rem; color:#1f1f1f; margin:2rem 0 1rem; }
+        .room-page h2.room-subhead { font-family:var(--font-raleway),"Raleway",sans-serif; font-weight:500; font-size:1.75rem; color:#1f1f1f; margin:2.25rem 0 1.1rem; }
 
         /* Features as a two-column checklist with gold ticks. */
         .room-page .room-features { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:1fr; gap:.65rem 2rem; }

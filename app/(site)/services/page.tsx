@@ -1,18 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Raleway } from 'next/font/google';
 import { AmenitiesGrid, PageHero } from '@/components/site/blocks';
 import { Paragraphs } from '@/components/site/text';
 import { getAmenities, getSection, getServices } from '@/lib/content/queries';
-
-// Same Raleway setup as the homepage, so the service rows share its type
-// scale (see the services-page styles below).
-const raleway = Raleway({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-raleway',
-  display: 'swap',
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getSection('services.hero')).title };
@@ -35,8 +25,7 @@ export default async function Services() {
   ]);
 
   return (
-    // Wrapper exists only to put --font-raleway in scope for the CSS below.
-    <div className={raleway.variable}>
+    <div>
       <PageHero data={hero} />
 
       <style href="services-page" precedence="theme">{`

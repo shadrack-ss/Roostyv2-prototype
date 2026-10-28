@@ -433,9 +433,20 @@ export default async function Home() {
         <div className="site-section bg-light">
           <div className="container">
             <SectionHeading>{roomsSection.heading}</SectionHeading>
-            <div className="row">
+            <style href="home-rooms" precedence="theme">{`
+              /* Two rooms a row (one on phones), so each photo is large. The
+                 photos share one 3:2 crop and the cards one height per row,
+                 which stops a portrait or tall photo making its card taller
+                 than its neighbour. */
+              .home-rooms .hotel-room { height:100%; }
+              .home-rooms .hotel-room > .thumbnail img { display:block; width:100%; aspect-ratio:3 / 2; object-fit:cover; }
+              .home-rooms .hotel-room .heading { font-size:24px; }
+              .home-rooms .hotel-room .price { display:block; margin-top:.35rem; font-size:1.15rem; }
+              .home-rooms .hotel-room .hotel-room-body { padding:28px 30px 32px; }
+            `}</style>
+            <div className="row home-rooms">
               {featuredRooms.map((room) => (
-                <div className="col-md-6 col-lg-3 mb-5" key={room.id}>
+                <div className="col-md-6 mb-5" key={room.id}>
                   <div className="hotel-room text-center">
                     <Link href={`/rooms/${room.slug}`} className="d-block mb-0 thumbnail">
                       <img src={room.imageUrl} alt={room.name} className="img-fluid" loading="lazy" decoding="async" />
